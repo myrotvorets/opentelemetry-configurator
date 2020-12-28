@@ -9,6 +9,7 @@ import {
     ResourceDetectionConfigWithLogger,
     SERVICE_RESOURCE,
 } from '@opentelemetry/resources';
+import { getContainerIDFormCGroup } from './utils';
 
 class K8sDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
@@ -38,35 +39,23 @@ class K8sDetector implements Detector {
         return new Resource(K8sDetector.cleanUpAttributes(attrs));
     }
 
-    private static async getContainerID(): Promise<string> {
-        try {
-            const raw = await promises.readFile('/proc/self/cgroup', { encoding: 'ascii' });
-            const lines = raw.trim().split('\n');
-            for (const line of lines) {
-                if (/\/[0-9a-f]{64}$/u.test(line)) {
-                    return line.slice(-64, -52);
-                }
-            }
-        } catch (e) {
-            // Do nothing
-        }
-
-        return '';
+    private static getContainerID(): Promise<string> {
+        return getContainerIDFormCGroup(/\/([0-9a-f]{12})[0-9a-f]{52}$/u);
     }
 
     // This method is internal to our configuration
-    private static async getUID(): Promise<string> {
-        try {
-            return (await promises.readFile('/etc/podinfo/uid', { encoding: 'ascii' })).trim();
-        } catch (e) {
-            return '';
-        }
+    private static getUID(): Promise<string> {
+        return K8sDetector.readFile('/etc/podinfo/uid');
     }
 
     // This method is internal to our configuration
-    private static async getNamespaceName(): Promise<string> {
+    private static getNamespaceName(): Promise<string> {
+        return K8sDetector.readFile('/etc/podinfo/namespace');
+    }
+
+    private static async readFile(name: string): Promise<string> {
         try {
-            return (await promises.readFile('/etc/podinfo/namespace', { encoding: 'ascii' })).trim();
+            return (await promises.readFile(name, { encoding: 'ascii' })).trim();
         } catch (e) {
             return '';
         }

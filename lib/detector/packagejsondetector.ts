@@ -37,14 +37,16 @@ class PackageJsonDetector implements Detector {
         const locations: string[] = [];
         // istanbul ignore next
         if (require.main?.filename) {
-            locations.push(resolve(join(dirname(require.main.filename), 'package.json')));
-            locations.push(resolve(join(dirname(require.main.filename), '..', 'package.json')));
+            locations.push(
+                join(dirname(require.main.filename), 'package.json'),
+                join(dirname(require.main.filename), '..', 'package.json'),
+            );
         }
 
         const cwd = process.cwd();
-        locations.push(resolve(join(cwd, 'package.json')));
+        locations.push(join(cwd, 'package.json'));
 
-        return locations;
+        return locations.map((item) => resolve(item));
     }
 
     private static async fileExists(path: string): Promise<boolean> {

@@ -1,5 +1,4 @@
 import { hostname } from 'os';
-import { promises } from 'fs';
 import {
     CONTAINER_RESOURCE,
     Detector,
@@ -7,6 +6,7 @@ import {
     Resource,
     ResourceDetectionConfigWithLogger,
 } from '@opentelemetry/resources';
+import { getContainerIDFormCGroup } from './utils';
 
 class DockerDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
@@ -22,20 +22,8 @@ class DockerDetector implements Detector {
         return Resource.empty();
     }
 
-    private static async getContainerID(): Promise<string> {
-        try {
-            const raw = await promises.readFile('/proc/self/cgroup', { encoding: 'ascii' });
-            const lines = raw.trim().split('\n');
-            for (const line of lines) {
-                if (/\/docker\/[0-9a-f]{64}$/u.test(line)) {
-                    return line.slice(-64, -52);
-                }
-            }
-        } catch (e) {
-            // Do nothing
-        }
-
-        return '';
+    private static getContainerID(): Promise<string> {
+        return getContainerIDFormCGroup(/\/docker\/([0-9a-f]{12})[0-9a-f]{52}$/u);
     }
 }
 
