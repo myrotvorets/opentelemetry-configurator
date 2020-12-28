@@ -1,0 +1,78 @@
+name: Publish Package
+
+on:
+  release:
+    types:
+      - released
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 14
+
+jobs:
+  prepare:
+    name: Prepare the source code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v2.1.3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache Node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.NODE_VERSION }}-
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+
+      - name: Run clean install
+        run: npm ci
+
+      - name: Create tarball
+        run: npm pack
+
+      - name: Save tarball
+        uses: actions/upload-artifact@v2
+        with:
+          name: package
+          path: "*.tgz"
+          retention-days: 1
+
+  publish:
+    name: Publish package
+    runs-on: ubuntu-latest
+    needs: prepare
+    strategy:
+      matrix:
+        registry:
+          - gpr
+        include:
+          - registry: gpr
+            secret: GITHUB_TOKEN
+            registry_url: https://npm.pkg.github.com/
+    steps:
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v2.1.3
+        with:
+          registry-url: ${{ matrix.registry_url }}
+
+      - name: Download tarball
+        uses: actions/download-artifact@v2
+        with:
+          name: package
+
+      - name: Publish package
+        run: npm publish *.tgz
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets[matrix.secret] }}
