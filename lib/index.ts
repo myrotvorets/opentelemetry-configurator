@@ -10,10 +10,12 @@ import {
 import { BatchSpanProcessor, SpanExporter } from '@opentelemetry/tracing';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
+import debug from 'debug';
 import { packageJsonDetector } from './detector/packagejsondetector';
 import { k8sDetector } from './detector/k8sdetector';
 import { dockerDetector } from './detector/dockerdetector';
 
+const dbg = debug('otcfg');
 export interface Config {
     serviceName: string;
     logger?: Logger;
@@ -57,6 +59,8 @@ export class OpenTelemetryConfigurator {
         }
 
         this.traceProvider.register();
+
+        dbg(this.nodeTracerConfig.resource?.attributes);
 
         process.once('SIGINT', this.shutdownHandler);
         process.once('SIGTERM', this.shutdownHandler);
