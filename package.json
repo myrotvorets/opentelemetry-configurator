@@ -25,7 +25,7 @@
   "author": "Myrotvorets <support@myrotvorets.center> (https://myrotvorets.center/)",
   "license": "MIT",
   "devDependencies": {
-    "@myrotvorets/eslint-config-myrotvorets-ts": "^2.2.0",
+    "@myrotvorets/eslint-config-myrotvorets-ts": "^2.2.4",
     "@opentelemetry/core": "^0.14.0",
     "@types/debug": "^4.1.5",
     "@types/jest": "^26.0.19",
