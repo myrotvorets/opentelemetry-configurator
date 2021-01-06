@@ -26,6 +26,13 @@ export interface Config {
     traceExporter?: SpanExporter;
 }
 
+const debugLogger: Logger = {
+    debug: dbg,
+    error: debug('otcfg:error'),
+    warn: debug('otcfg:warn'),
+    info: debug('otcfg:info'),
+};
+
 export class OpenTelemetryConfigurator {
     private traceProvider?: NodeTracerProvider;
     private readonly nodeTracerConfig: NodeTracerConfig;
@@ -33,14 +40,15 @@ export class OpenTelemetryConfigurator {
     private readonly traceExporter?: SpanExporter;
 
     public constructor(config: Config) {
+        const logger = config.logger ?? (debug.enabled('otcfg') ? debugLogger : undefined);
         this.nodeTracerConfig = {
             ...(config.tracer || {}),
-            logger: config.logger,
+            logger: logger,
             resource: config.resource || Resource.empty(),
         };
 
         this.resourceDetectionConfig = {
-            logger: config.logger,
+            logger: logger,
             detectors: config.detectors ?? [processDetector, packageJsonDetector, k8sDetector, dockerDetector],
         };
 
