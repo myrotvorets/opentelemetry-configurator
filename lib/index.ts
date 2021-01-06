@@ -16,6 +16,7 @@ import { k8sDetector } from './detector/k8sdetector';
 import { dockerDetector } from './detector/dockerdetector';
 
 const dbg = debug('otcfg');
+
 export interface Config {
     serviceName: string;
     logger?: Logger;
@@ -90,6 +91,7 @@ export class OpenTelemetryConfigurator {
 
     private async detectResources(): Promise<void> {
         const resource = await detectResources(this.resourceDetectionConfig);
+        dbg(resource);
         (this.nodeTracerConfig.resource as Resource).merge(resource);
     }
 

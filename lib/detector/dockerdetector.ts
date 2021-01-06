@@ -6,19 +6,26 @@ import {
     Resource,
     ResourceDetectionConfigWithLogger,
 } from '@opentelemetry/resources';
+import debug from 'debug';
 import { getContainerIDFormCGroup } from './utils';
+
+const dbg = debug('otcfg');
 
 class DockerDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
     public async detect(_config: ResourceDetectionConfigWithLogger): Promise<Resource> {
         const cid = await DockerDetector.getContainerID();
         if (cid) {
-            return new Resource({
+            const attrs = {
                 [HOST_RESOURCE.NAME]: process.env.HOSTNAME || hostname(),
                 [CONTAINER_RESOURCE.ID]: cid,
-            });
+            };
+
+            dbg('DockerDetector:', attrs);
+            return new Resource(attrs);
         }
 
+        dbg('DockerDetector: not a Docker');
         return Resource.empty();
     }
 

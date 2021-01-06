@@ -1,6 +1,9 @@
 import { promises } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { Detector, Resource, ResourceDetectionConfigWithLogger, SERVICE_RESOURCE } from '@opentelemetry/resources';
+import debug from 'debug';
+
+const dbg = debug('otcfg');
 
 class PackageJsonDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
@@ -9,23 +12,28 @@ class PackageJsonDetector implements Detector {
             const file = await PackageJsonDetector.findPackageJson();
             const raw = await promises.readFile(file, { encoding: 'utf-8' });
             const json = JSON.parse(raw) as Record<string, unknown>;
-
-            return new Resource({
+            const attrs = {
                 [SERVICE_RESOURCE.NAME]: `${json.name}`,
                 [SERVICE_RESOURCE.VERSION]: `${json.version}`,
-            });
+            };
+
+            dbg('PackageJsonDetector:', attrs);
+            return new Resource(attrs);
         } catch (e) {
             // Do nothing
         }
 
+        dbg('PackageJsonDetector: package.json not found');
         return Resource.empty();
     }
 
     private static async findPackageJson(): Promise<string> {
         const locations = PackageJsonDetector.getLocations();
         for (const location of locations) {
+            dbg('PackageJsonDetector: trying', location);
             // eslint-disable-next-line no-await-in-loop
             if (await PackageJsonDetector.fileExists(location)) {
+                dbg('PackageJsonDetector: found', location);
                 return location;
             }
         }

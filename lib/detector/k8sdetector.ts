@@ -9,13 +9,17 @@ import {
     ResourceDetectionConfigWithLogger,
     SERVICE_RESOURCE,
 } from '@opentelemetry/resources';
+import debug from 'debug';
 import { getContainerIDFormCGroup } from './utils';
+
+const dbg = debug('otcfg');
 
 class K8sDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
     public async detect(_config: ResourceDetectionConfigWithLogger): Promise<Resource> {
         const matches = /^(.*)-([a-f0-9]+)-([a-z0-9]{5})$/u.exec(process.env.HOSTNAME || '');
         if (!matches) {
+            dbg('K8sDetector: not a k8s');
             return Resource.empty();
         }
 
@@ -36,7 +40,9 @@ class K8sDetector implements Detector {
             [SERVICE_RESOURCE.NAMESPACE]: ns,
         };
 
-        return new Resource(K8sDetector.cleanUpAttributes(attrs));
+        const cleaned = K8sDetector.cleanUpAttributes(attrs);
+        dbg('K8sDetector:', cleaned);
+        return new Resource(cleaned);
     }
 
     private static getContainerID(): Promise<string> {
