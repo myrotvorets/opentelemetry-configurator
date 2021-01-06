@@ -100,7 +100,7 @@ export class OpenTelemetryConfigurator {
     private async detectResources(): Promise<void> {
         const resource = await detectResources(this.resourceDetectionConfig);
         dbg(resource);
-        (this.nodeTracerConfig.resource as Resource).merge(resource);
+        this.nodeTracerConfig.resource = (this.nodeTracerConfig.resource as Resource).merge(resource);
     }
 
     private static getTraceExporter(
