@@ -6,10 +6,7 @@ import {
     Resource,
     ResourceDetectionConfigWithLogger,
 } from '@opentelemetry/resources';
-import debug from 'debug';
 import { getContainerIDFormCGroup } from './utils';
-
-const dbg = debug('otcfg');
 
 class DockerDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
@@ -21,11 +18,9 @@ class DockerDetector implements Detector {
                 [CONTAINER_RESOURCE.ID]: cid,
             };
 
-            dbg('DockerDetector:', attrs);
             return new Resource(attrs);
         }
 
-        dbg('DockerDetector: not a Docker');
         return Resource.empty();
     }
 

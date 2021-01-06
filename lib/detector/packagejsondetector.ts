@@ -17,13 +17,11 @@ class PackageJsonDetector implements Detector {
                 [SERVICE_RESOURCE.VERSION]: `${json.version}`,
             };
 
-            dbg('PackageJsonDetector:', attrs);
             return new Resource(attrs);
         } catch (e) {
             // Do nothing
         }
 
-        dbg('PackageJsonDetector: package.json not found');
         return Resource.empty();
     }
 

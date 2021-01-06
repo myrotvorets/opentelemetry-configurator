@@ -69,7 +69,7 @@ export class OpenTelemetryConfigurator {
 
         this.traceProvider.register();
 
-        dbg(this.nodeTracerConfig.resource?.attributes);
+        dbg(this.traceProvider.resource?.attributes);
 
         process.once('SIGINT', this.shutdownHandler);
         process.once('SIGTERM', this.shutdownHandler);
