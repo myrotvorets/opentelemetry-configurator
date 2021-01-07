@@ -7,7 +7,7 @@ import {
     detectResources,
     processDetector,
 } from '@opentelemetry/resources';
-import { BatchSpanProcessor, SpanExporter } from '@opentelemetry/tracing';
+import { BatchSpanProcessor, SimpleSpanProcessor, SpanExporter } from '@opentelemetry/tracing';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import debug from 'debug';
@@ -64,7 +64,8 @@ export class OpenTelemetryConfigurator {
         this.traceProvider = new NodeTracerProvider(this.nodeTracerConfig);
 
         if (this.traceExporter) {
-            this.traceProvider.addSpanProcessor(new BatchSpanProcessor(this.traceExporter));
+            const SpanProcessor = process.env.NODE_ENV === 'production' ? BatchSpanProcessor : SimpleSpanProcessor;
+            this.traceProvider.addSpanProcessor(new SpanProcessor(this.traceExporter));
         }
 
         this.traceProvider.register();
