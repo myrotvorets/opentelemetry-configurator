@@ -28,7 +28,7 @@
     "@myrotvorets/eslint-config-myrotvorets-ts": "^2.2.4",
     "@opentelemetry/core": "^0.14.0",
     "@types/debug": "^4.1.5",
-    "@types/jest": "^26.0.19",
+    "@types/jest": "^26.0.20",
     "@typescript-eslint/eslint-plugin": "^4.12.0",
     "eslint": "^7.17.0",
     "eslint-plugin-import": "^2.22.1",
