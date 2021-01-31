@@ -47,7 +47,7 @@ jobs:
 
       - name: Retrieve information from package.json
         if: ${{ github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/') }}
-        uses: myrotvorets/info-from-package-json-action@1.0.1
+        uses: myrotvorets/info-from-package-json-action@1.0.2
         id: ver
 
       - name: Fix paths in test-report.xml
