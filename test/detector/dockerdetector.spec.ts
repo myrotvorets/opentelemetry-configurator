@@ -1,18 +1,11 @@
 import { promises } from 'fs';
 import os from 'os';
-import {
-    CONTAINER_RESOURCE,
-    HOST_RESOURCE,
-    Resource,
-    ResourceDetectionConfigWithLogger,
-} from '@opentelemetry/resources';
-import { NoopLogger } from '@opentelemetry/api';
+import { CONTAINER_RESOURCE, HOST_RESOURCE, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
 import { dockerDetector } from '../../lib/detector/dockerdetector';
 
 const mockedReadFile = jest.spyOn(promises, 'readFile');
 
-const config: ResourceDetectionConfigWithLogger = {
-    logger: new NoopLogger(),
+const config: ResourceDetectionConfig = {
     detectors: [dockerDetector],
 };
 

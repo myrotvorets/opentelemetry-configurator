@@ -4,13 +4,13 @@ import {
     Detector,
     HOST_RESOURCE,
     Resource,
-    ResourceDetectionConfigWithLogger,
+    ResourceDetectionConfig,
 } from '@opentelemetry/resources';
 import { getContainerIDFormCGroup } from './utils';
 
 class DockerDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
-    public async detect(_config: ResourceDetectionConfigWithLogger): Promise<Resource> {
+    public async detect(_config: ResourceDetectionConfig): Promise<Resource> {
         const cid = await DockerDetector.getContainerID();
         if (cid) {
             const attrs = {

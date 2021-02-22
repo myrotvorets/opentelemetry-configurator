@@ -6,14 +6,14 @@ import {
     K8S_RESOURCE,
     Resource,
     ResourceAttributes,
-    ResourceDetectionConfigWithLogger,
+    ResourceDetectionConfig,
     SERVICE_RESOURCE,
 } from '@opentelemetry/resources';
 import { getContainerIDFormCGroup } from './utils';
 
 class K8sDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
-    public async detect(_config: ResourceDetectionConfigWithLogger): Promise<Resource> {
+    public async detect(_config: ResourceDetectionConfig): Promise<Resource> {
         const matches = /^(.*)-([a-f0-9]+)-([a-z0-9]{5})$/u.exec(process.env.HOSTNAME || '');
         if (!matches) {
             return Resource.empty();

@@ -4,16 +4,14 @@ import {
     HOST_RESOURCE,
     K8S_RESOURCE,
     Resource,
-    ResourceDetectionConfigWithLogger,
+    ResourceDetectionConfig,
     SERVICE_RESOURCE,
 } from '@opentelemetry/resources';
-import { NoopLogger } from '@opentelemetry/api';
 import { k8sDetector } from '../../lib/detector/k8sdetector';
 
 const mockedReadFile = jest.spyOn(promises, 'readFile');
 
-const config: ResourceDetectionConfigWithLogger = {
-    logger: new NoopLogger(),
+const config: ResourceDetectionConfig = {
     detectors: [k8sDetector],
 };
 

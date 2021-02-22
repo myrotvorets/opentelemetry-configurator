@@ -1,4 +1,3 @@
-import { Logger } from '@opentelemetry/api';
 import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/node';
 import {
     Detector,
@@ -19,19 +18,11 @@ const dbg = debug('otcfg');
 
 export interface Config {
     serviceName: string;
-    logger?: Logger;
     resource?: Resource;
     tracer?: Omit<NodeTracerConfig, 'logger' | 'resource'>;
     detectors?: Detector[];
     traceExporter?: SpanExporter;
 }
-
-const debugLogger: Logger = {
-    debug: dbg,
-    error: debug('otcfg:error'),
-    warn: debug('otcfg:warn'),
-    info: debug('otcfg:info'),
-};
 
 export class OpenTelemetryConfigurator {
     private traceProvider?: NodeTracerProvider;
@@ -40,15 +31,12 @@ export class OpenTelemetryConfigurator {
     private readonly traceExporter?: SpanExporter;
 
     public constructor(config: Config) {
-        const logger = config.logger ?? (debug.enabled('otcfg') ? debugLogger : undefined);
         this.nodeTracerConfig = {
             ...(config.tracer || {}),
-            logger: logger,
             resource: config.resource || Resource.empty(),
         };
 
         this.resourceDetectionConfig = {
-            logger: logger,
             detectors: config.detectors ?? [processDetector, packageJsonDetector, k8sDetector, dockerDetector],
         };
 

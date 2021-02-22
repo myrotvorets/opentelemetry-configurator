@@ -1,13 +1,13 @@
 import { promises } from 'fs';
 import { dirname, join, resolve } from 'path';
-import { Detector, Resource, ResourceDetectionConfigWithLogger, SERVICE_RESOURCE } from '@opentelemetry/resources';
+import { Detector, Resource, ResourceDetectionConfig, SERVICE_RESOURCE } from '@opentelemetry/resources';
 import debug from 'debug';
 
 const dbg = debug('otcfg');
 
 class PackageJsonDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
-    public async detect(_config: ResourceDetectionConfigWithLogger): Promise<Resource> {
+    public async detect(_config: ResourceDetectionConfig): Promise<Resource> {
         try {
             const file = await PackageJsonDetector.findPackageJson();
             const raw = await promises.readFile(file, { encoding: 'utf-8' });

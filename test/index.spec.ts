@@ -1,21 +1,13 @@
 /* eslint-disable class-methods-use-this, @typescript-eslint/no-empty-function */
-import { Logger } from '@opentelemetry/api';
 import { ExportResult, ExportResultCode } from '@opentelemetry/core';
 import { ReadableSpan, SpanExporter } from '@opentelemetry/tracing';
-import { Detector, Resource, ResourceDetectionConfigWithLogger } from '@opentelemetry/resources';
+import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
 import { OpenTelemetryConfigurator } from '../lib/index';
 
 class MyDetector implements Detector {
-    public detect(_config: ResourceDetectionConfigWithLogger): Promise<Resource> {
+    public detect(_config: ResourceDetectionConfig): Promise<Resource> {
         return Promise.resolve(Resource.empty());
     }
-}
-
-class MyLogger implements Logger {
-    public error(_message: string, ..._args: unknown[]): void {}
-    public warn(_message: string, ..._args: unknown[]): void {}
-    public info(_message: string, ..._args: unknown[]): void {}
-    public debug(_message: string, ..._args: unknown[]): void {}
 }
 
 class MySpanExporter implements SpanExporter {
@@ -36,14 +28,12 @@ describe('OpenTelemetryConfigurator', () => {
     });
 
     it('should pass a basic test', async () => {
-        const logger = new MyLogger();
         const exporter = new MySpanExporter();
 
         const mockedShutdown = jest.spyOn(exporter, 'shutdown');
 
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
-            logger,
             detectors: [],
             traceExporter: exporter,
         });
@@ -51,7 +41,6 @@ describe('OpenTelemetryConfigurator', () => {
         await configurator.start();
         const tracer = configurator.getTraceProvider();
         expect(tracer).not.toBeUndefined();
-        expect(tracer?.logger).toBe(logger);
 
         await configurator.shutdown();
         expect(mockedShutdown).toHaveBeenCalledTimes(1);

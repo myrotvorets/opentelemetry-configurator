@@ -1,13 +1,11 @@
 import { Stats, promises } from 'fs';
-import { Resource, ResourceDetectionConfigWithLogger, SERVICE_RESOURCE } from '@opentelemetry/resources';
-import { NoopLogger } from '@opentelemetry/api';
+import { Resource, ResourceDetectionConfig, SERVICE_RESOURCE } from '@opentelemetry/resources';
 import { packageJsonDetector } from '../../lib/detector/packagejsondetector';
 
 const mockedStat = jest.spyOn(promises, 'stat');
 const mockedReadFile = jest.spyOn(promises, 'readFile');
 
-const config: ResourceDetectionConfigWithLogger = {
-    logger: new NoopLogger(),
+const config: ResourceDetectionConfig = {
     detectors: [packageJsonDetector],
 };
 
