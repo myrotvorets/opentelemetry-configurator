@@ -1,4 +1,5 @@
 import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/node';
+import { InstrumentationOption, registerInstrumentations } from '@opentelemetry/instrumentation';
 import {
     Detector,
     Resource,
@@ -19,16 +20,19 @@ const dbg = debug('otcfg');
 export interface Config {
     serviceName: string;
     resource?: Resource;
-    tracer?: Omit<NodeTracerConfig, 'logger' | 'resource'>;
+    tracer?: Omit<NodeTracerConfig, 'plugins' | 'resource'>;
     detectors?: Detector[];
     traceExporter?: SpanExporter;
+    instrumentations?: InstrumentationOption[];
 }
 
 export class OpenTelemetryConfigurator {
-    private traceProvider?: NodeTracerProvider;
+    private tracerProvider?: NodeTracerProvider;
     private readonly nodeTracerConfig: NodeTracerConfig;
     private readonly resourceDetectionConfig: ResourceDetectionConfig;
     private readonly traceExporter?: SpanExporter;
+    private readonly instrumentations?: InstrumentationOption[];
+    private unloader?: () => void;
 
     public constructor(config: Config) {
         this.nodeTracerConfig = {
@@ -41,24 +45,29 @@ export class OpenTelemetryConfigurator {
         };
 
         this.traceExporter = OpenTelemetryConfigurator.getTraceExporter(config.serviceName, config.traceExporter);
+        this.instrumentations = config.instrumentations;
     }
 
     public async start(): Promise<void> {
-        if (this.traceProvider) {
+        if (this.tracerProvider) {
             return;
         }
 
         await this.detectResources();
-        this.traceProvider = new NodeTracerProvider(this.nodeTracerConfig);
+        this.tracerProvider = new NodeTracerProvider(this.nodeTracerConfig);
 
         if (this.traceExporter) {
             const SpanProcessor = process.env.NODE_ENV === 'production' ? BatchSpanProcessor : SimpleSpanProcessor;
-            this.traceProvider.addSpanProcessor(new SpanProcessor(this.traceExporter));
+            this.tracerProvider.addSpanProcessor(new SpanProcessor(this.traceExporter));
         }
 
-        this.traceProvider.register();
+        this.tracerProvider.register();
+        this.unloader = registerInstrumentations({
+            instrumentations: this.instrumentations,
+            tracerProvider: this.tracerProvider,
+        });
 
-        dbg(this.traceProvider.resource?.attributes);
+        dbg(this.tracerProvider.resource?.attributes);
 
         process.once('SIGINT', this.shutdownHandler);
         process.once('SIGTERM', this.shutdownHandler);
@@ -67,18 +76,20 @@ export class OpenTelemetryConfigurator {
 
     public async shutdown(): Promise<void> {
         const promises: Promise<unknown>[] = [];
-        if (this.traceProvider) {
+        if (this.tracerProvider) {
             // Trace provider will shut down the span processor
             // Span processor will shut down the span exporter
-            promises.push(this.traceProvider.shutdown());
+            promises.push(this.tracerProvider.shutdown());
         }
 
         process.off('SIGINT', this.shutdownHandler);
         process.off('SIGTERM', this.shutdownHandler);
         process.off('SIGQUIT', this.shutdownHandler);
 
-        this.traceProvider = undefined;
+        this.tracerProvider = undefined;
 
+        this.unloader?.();
+        this.unloader = undefined;
         await Promise.all(promises);
     }
 
@@ -120,6 +131,6 @@ export class OpenTelemetryConfigurator {
     }
 
     public getTraceProvider(): NodeTracerProvider | undefined {
-        return this.traceProvider;
+        return this.tracerProvider;
     }
 }
