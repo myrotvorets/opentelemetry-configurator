@@ -52,7 +52,7 @@
     "@opentelemetry/plugin-http": "^0.17.0",
     "@opentelemetry/plugin-https": "^0.17.0",
     "@opentelemetry/resources": "^0.17.0",
-    "@opentelemetry/tracing": "^0.17.0",
+    "@opentelemetry/tracing": "^0.18.0",
     "debug": "^4.3.1"
   },
   "repository": {
