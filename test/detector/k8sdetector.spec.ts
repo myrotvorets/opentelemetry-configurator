@@ -53,7 +53,7 @@ describe('PackageJsonDetector', () => {
 
         process.env.HOSTNAME = expectedHostname;
 
-        return k8sDetector.detect(config).then((resource) => {
+        return k8sDetector.detect(config).then((resource) =>
             expect(resource).toHaveProperty('attributes', {
                 [HOST_RESOURCE.NAME]: expectedHostname,
                 [HOST_RESOURCE.ID]: expectedUID,
@@ -63,8 +63,8 @@ describe('PackageJsonDetector', () => {
                 [CONTAINER_RESOURCE.ID]: expectedCID,
                 [SERVICE_RESOURCE.INSTANCE_ID]: expectedDeployment,
                 [SERVICE_RESOURCE.NAMESPACE]: expectedNS,
-            });
-        });
+            }),
+        );
     });
 
     it('should discard empty values', () => {
@@ -75,13 +75,13 @@ describe('PackageJsonDetector', () => {
         mockedReadFile.mockRejectedValue(new Error());
         process.env.HOSTNAME = expectedHostname;
 
-        return k8sDetector.detect(config).then((resource) => {
+        return k8sDetector.detect(config).then((resource) =>
             expect(resource).toHaveProperty('attributes', {
                 [HOST_RESOURCE.NAME]: expectedHostname,
                 [K8S_RESOURCE.POD_NAME]: expectedPod,
                 [K8S_RESOURCE.DEPLOYMENT_NAME]: expectedDeployment,
                 [SERVICE_RESOURCE.INSTANCE_ID]: expectedDeployment,
-            });
-        });
+            }),
+        );
     });
 });

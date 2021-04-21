@@ -12,9 +12,7 @@ const config: ResourceDetectionConfig = {
 describe('PackageJsonDetector', () => {
     it('should return an empty resource when package.json cannot be located', () => {
         mockedStat.mockRejectedValue(new Error());
-        return packageJsonDetector.detect(config).then((resource) => {
-            expect(resource).toBe(Resource.empty());
-        });
+        return packageJsonDetector.detect(config).then((resource) => expect(resource).toBe(Resource.empty()));
     });
 
     it('should retrieve name and version from package.json', () => {
@@ -27,6 +25,7 @@ describe('PackageJsonDetector', () => {
             expect(resource).toHaveProperty('attributes', expect.any(Object));
             expect(resource.attributes).toHaveProperty([SERVICE_RESOURCE.NAME], obj.name);
             expect(resource.attributes).toHaveProperty([SERVICE_RESOURCE.VERSION], obj.version);
+            return true;
         });
     });
 });
