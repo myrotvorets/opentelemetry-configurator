@@ -10,7 +10,7 @@
     "pretest": "npm run lint",
     "test": "jest",
     "posttest": "npm run build",
-    "prepare": "npm run build"
+    "pack": "npm run build"
   },
   "files": [
     "dist/lib/index.d.ts",
@@ -26,7 +26,7 @@
   "license": "MIT",
   "devDependencies": {
     "@myrotvorets/eslint-config-myrotvorets-ts": "^2.2.5",
-    "@opentelemetry/core": "^0.18.0",
+    "@opentelemetry/core": "^0.19.0",
     "@types/debug": "^4.1.5",
     "@types/jest": "^26.0.20",
     "eslint": "^7.19.0",
@@ -42,14 +42,14 @@
   },
   "dependencies": {
     "@opentelemetry/api": "^1.0.0-rc.0",
-    "@opentelemetry/exporter-jaeger": "^0.18.0",
-    "@opentelemetry/exporter-zipkin": "^0.18.0",
-    "@opentelemetry/instrumentation": "^0.18.0",
-    "@opentelemetry/node": "^0.18.0",
+    "@opentelemetry/exporter-jaeger": "^0.19.0",
+    "@opentelemetry/exporter-zipkin": "^0.19.0",
+    "@opentelemetry/instrumentation": "^0.19.0",
+    "@opentelemetry/node": "^0.19.0",
     "@opentelemetry/plugin-http": "^0.18.0",
     "@opentelemetry/plugin-https": "^0.18.0",
-    "@opentelemetry/resources": "^0.18.0",
-    "@opentelemetry/tracing": "^0.18.0",
+    "@opentelemetry/resources": "^0.19.0",
+    "@opentelemetry/tracing": "^0.19.0",
     "debug": "^4.3.1"
   },
   "repository": {
