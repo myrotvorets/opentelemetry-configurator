@@ -38,18 +38,16 @@ describe('PackageJsonDetector', () => {
         const expectedDeployment = '9cb4c7c4b';
         const expectedHostname = `${expectedPod}-${expectedDeployment}-p2qbn`;
 
-        mockedReadFile.mockImplementation(
-            (path: Parameters<typeof promises.readFile>[0]): Promise<string> => {
-                const fname = path as string;
-                const lookup: Record<string, string> = {
-                    '/proc/self/cgroup': `12:rdma:/\n12:cpuset:/kubepods/pod${expectedUID}/${containerID}`,
-                    '/etc/podinfo/uid': expectedUID,
-                    '/etc/podinfo/namespace': expectedNS,
-                };
+        mockedReadFile.mockImplementation((path: Parameters<typeof promises.readFile>[0]): Promise<string> => {
+            const fname = path as string;
+            const lookup: Record<string, string> = {
+                '/proc/self/cgroup': `12:rdma:/\n12:cpuset:/kubepods/pod${expectedUID}/${containerID}`,
+                '/etc/podinfo/uid': expectedUID,
+                '/etc/podinfo/namespace': expectedNS,
+            };
 
-                return lookup[fname] ? Promise.resolve(lookup[fname]) : Promise.reject(new Error());
-            },
-        );
+            return lookup[fname] ? Promise.resolve(lookup[fname]) : Promise.reject(new Error());
+        });
 
         process.env.HOSTNAME = expectedHostname;
 
