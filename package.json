@@ -1,6 +1,6 @@
 {
   "name": "@myrotvorets/opentelemetry-configurator",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "Configures OpenTelemetry for our microservices",
   "main": "dist/lib/index.js",
   "scripts": {
