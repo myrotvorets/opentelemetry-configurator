@@ -1,5 +1,6 @@
 import { Stats, promises } from 'fs';
-import { Resource, ResourceDetectionConfig, SERVICE_RESOURCE } from '@opentelemetry/resources';
+import { Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { ResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { packageJsonDetector } from '../../lib/detector/packagejsondetector';
 
 const mockedStat = jest.spyOn(promises, 'stat');
@@ -23,8 +24,8 @@ describe('PackageJsonDetector', () => {
         mockedReadFile.mockResolvedValueOnce(JSON.stringify(obj));
         return packageJsonDetector.detect(config).then((resource) => {
             expect(resource).toHaveProperty('attributes', expect.any(Object));
-            expect(resource.attributes).toHaveProperty([SERVICE_RESOURCE.NAME], obj.name);
-            expect(resource.attributes).toHaveProperty([SERVICE_RESOURCE.VERSION], obj.version);
+            expect(resource.attributes).toHaveProperty([ResourceAttributes.SERVICE_NAME], obj.name);
+            expect(resource.attributes).toHaveProperty([ResourceAttributes.SERVICE_VERSION], obj.version);
             return true;
         });
     });

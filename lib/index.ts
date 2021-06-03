@@ -122,9 +122,7 @@ export class OpenTelemetryConfigurator {
         // istanbul ignore if
         if (process.env.JAEGER_AGENT_HOST || process.env.JAEGER_ENDPOINT) {
             // See https://github.com/jaegertracing/jaeger-client-node#environment-variables
-            return new JaegerExporter({
-                serviceName,
-            });
+            return new JaegerExporter();
         }
 
         return undefined;

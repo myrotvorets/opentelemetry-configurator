@@ -1,6 +1,7 @@
 import { promises } from 'fs';
 import os from 'os';
-import { CONTAINER_RESOURCE, HOST_RESOURCE, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { ResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { dockerDetector } from '../../lib/detector/dockerdetector';
 
 const mockedReadFile = jest.spyOn(promises, 'readFile');
@@ -13,8 +14,10 @@ const env = { ...process.env };
 
 function checkResource(resource: Resource, expectedID: string, expectedHostname: string): void {
     expect(resource).toHaveProperty('attributes', expect.any(Object));
-    expect(resource.attributes).toHaveProperty([CONTAINER_RESOURCE.ID], expectedID);
-    expect(resource.attributes).toHaveProperty([HOST_RESOURCE.NAME], expectedHostname);
+    expect(resource.attributes).toHaveProperty([ResourceAttributes.CONTAINER_ID], expectedID);
+    expect(resource.attributes).toHaveProperty([ResourceAttributes.HOST_NAME], expectedHostname);
+    expect(resource.attributes).toHaveProperty([ResourceAttributes.HOST_ARCH], os.arch());
+    expect(resource.attributes).toHaveProperty([ResourceAttributes.OS_TYPE], os.type());
 }
 
 describe('PackageJsonDetector', () => {

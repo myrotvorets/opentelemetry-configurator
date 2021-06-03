@@ -1,14 +1,6 @@
 import { promises } from 'fs';
-import {
-    CONTAINER_RESOURCE,
-    Detector,
-    HOST_RESOURCE,
-    K8S_RESOURCE,
-    Resource,
-    ResourceAttributes,
-    ResourceDetectionConfig,
-    SERVICE_RESOURCE,
-} from '@opentelemetry/resources';
+import { Detector, Resource, ResourceAttributes, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { ResourceAttributes as SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { getContainerIDFormCGroup } from './utils';
 
 class K8sDetector implements Detector {
@@ -25,15 +17,13 @@ class K8sDetector implements Detector {
             K8sDetector.getNamespaceName(),
         ]);
 
-        const attrs: ResourceAttributes = {
-            [HOST_RESOURCE.NAME]: process.env.HOSTNAME as string,
-            [HOST_RESOURCE.ID]: uid,
-            [K8S_RESOURCE.POD_NAME]: matches[1],
-            [K8S_RESOURCE.DEPLOYMENT_NAME]: matches[2],
-            [K8S_RESOURCE.NAMESPACE_NAME]: ns,
-            [CONTAINER_RESOURCE.ID]: cid,
-            [SERVICE_RESOURCE.INSTANCE_ID]: matches[2],
-            [SERVICE_RESOURCE.NAMESPACE]: ns,
+        const attrs = {
+            [SemanticResourceAttributes.HOST_NAME]: process.env.HOSTNAME as string,
+            [SemanticResourceAttributes.HOST_ID]: uid,
+            [SemanticResourceAttributes.K8S_POD_NAME]: matches[1],
+            [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: matches[2],
+            [SemanticResourceAttributes.K8S_NAMESPACE_NAME]: ns,
+            [SemanticResourceAttributes.CONTAINER_ID]: cid,
         };
 
         const cleaned = K8sDetector.cleanUpAttributes(attrs);

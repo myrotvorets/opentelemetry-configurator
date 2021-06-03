@@ -1,12 +1,6 @@
 import { promises } from 'fs';
-import {
-    CONTAINER_RESOURCE,
-    HOST_RESOURCE,
-    K8S_RESOURCE,
-    Resource,
-    ResourceDetectionConfig,
-    SERVICE_RESOURCE,
-} from '@opentelemetry/resources';
+import { Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { ResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { k8sDetector } from '../../lib/detector/k8sdetector';
 
 const mockedReadFile = jest.spyOn(promises, 'readFile');
@@ -53,14 +47,12 @@ describe('PackageJsonDetector', () => {
 
         return k8sDetector.detect(config).then((resource) =>
             expect(resource).toHaveProperty('attributes', {
-                [HOST_RESOURCE.NAME]: expectedHostname,
-                [HOST_RESOURCE.ID]: expectedUID,
-                [K8S_RESOURCE.POD_NAME]: expectedPod,
-                [K8S_RESOURCE.DEPLOYMENT_NAME]: expectedDeployment,
-                [K8S_RESOURCE.NAMESPACE_NAME]: expectedNS,
-                [CONTAINER_RESOURCE.ID]: expectedCID,
-                [SERVICE_RESOURCE.INSTANCE_ID]: expectedDeployment,
-                [SERVICE_RESOURCE.NAMESPACE]: expectedNS,
+                [ResourceAttributes.HOST_NAME]: expectedHostname,
+                [ResourceAttributes.HOST_ID]: expectedUID,
+                [ResourceAttributes.K8S_POD_NAME]: expectedPod,
+                [ResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
+                [ResourceAttributes.K8S_NAMESPACE_NAME]: expectedNS,
+                [ResourceAttributes.CONTAINER_ID]: expectedCID,
             }),
         );
     });
@@ -75,10 +67,9 @@ describe('PackageJsonDetector', () => {
 
         return k8sDetector.detect(config).then((resource) =>
             expect(resource).toHaveProperty('attributes', {
-                [HOST_RESOURCE.NAME]: expectedHostname,
-                [K8S_RESOURCE.POD_NAME]: expectedPod,
-                [K8S_RESOURCE.DEPLOYMENT_NAME]: expectedDeployment,
-                [SERVICE_RESOURCE.INSTANCE_ID]: expectedDeployment,
+                [ResourceAttributes.HOST_NAME]: expectedHostname,
+                [ResourceAttributes.K8S_POD_NAME]: expectedPod,
+                [ResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
             }),
         );
     });
