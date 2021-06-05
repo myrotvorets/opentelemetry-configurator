@@ -14,6 +14,7 @@ import debug from 'debug';
 import { packageJsonDetector } from './detector/packagejsondetector';
 import { k8sDetector } from './detector/k8sdetector';
 import { dockerDetector } from './detector/dockerdetector';
+import { osDetector } from './detector/osdetector';
 
 const dbg = debug('otcfg');
 
@@ -41,7 +42,13 @@ export class OpenTelemetryConfigurator {
         };
 
         this.resourceDetectionConfig = {
-            detectors: config.detectors ?? [processDetector, packageJsonDetector, k8sDetector, dockerDetector],
+            detectors: config.detectors ?? [
+                processDetector,
+                osDetector,
+                packageJsonDetector,
+                k8sDetector,
+                dockerDetector,
+            ],
         };
 
         this.traceExporter = OpenTelemetryConfigurator.getTraceExporter(config.serviceName, config.traceExporter);

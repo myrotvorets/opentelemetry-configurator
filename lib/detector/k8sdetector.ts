@@ -34,12 +34,12 @@ class K8sDetector implements Detector {
         return getContainerIDFormCGroup(/\/([0-9a-f]{12})[0-9a-f]{52}$/u);
     }
 
-    // This method is internal to our configuration
+    // This method is specific to our configuration
     private static getUID(): Promise<string> {
         return K8sDetector.readFile('/etc/podinfo/uid');
     }
 
-    // This method is internal to our configuration
+    // This method is specific to our configuration
     private static getNamespaceName(): Promise<string> {
         return K8sDetector.readFile('/etc/podinfo/namespace');
     }

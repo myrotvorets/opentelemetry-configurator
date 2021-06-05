@@ -1,4 +1,3 @@
-import { arch, hostname, type } from 'os';
 import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
 import { ResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { getContainerIDFormCGroup } from './utils';
@@ -9,10 +8,7 @@ class DockerDetector implements Detector {
         const cid = await DockerDetector.getContainerID();
         if (cid) {
             const attrs = {
-                [ResourceAttributes.HOST_NAME]: process.env.HOSTNAME || hostname(),
-                [ResourceAttributes.HOST_ARCH]: arch(),
                 [ResourceAttributes.CONTAINER_ID]: cid,
-                [ResourceAttributes.OS_TYPE]: type(),
             };
 
             return new Resource(attrs);
