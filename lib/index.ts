@@ -74,6 +74,7 @@ export class OpenTelemetryConfigurator {
             tracerProvider: this.tracerProvider,
         });
 
+        // istanbul ignore next
         dbg(this.tracerProvider.resource?.attributes);
 
         process.once('SIGINT', this.shutdownHandler);

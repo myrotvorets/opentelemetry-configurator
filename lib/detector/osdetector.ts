@@ -48,7 +48,7 @@ class OSDetector implements Detector {
             'CYGWIN_NT-10.0': OsTypeValues.WINDOWS,
         };
 
-        return lut[os] ?? os.toUpperCase();
+        return lut[os] ?? os.replace(/[^a-z0-9]/giu, '').toUpperCase();
     }
 }
 

@@ -16,7 +16,7 @@ function checkResource(resource: Resource, expectedID: string): void {
     expect(resource.attributes).toHaveProperty([ResourceAttributes.CONTAINER_ID], expectedID);
 }
 
-describe('PackageJsonDetector', () => {
+describe('DockerDetector', () => {
     afterEach(() => {
         process.env = { ...env };
     });
