@@ -40,7 +40,7 @@ class OSDetector implements Detector {
             OpenBSD: OsTypeValues.OPENBSD,
             SunOS: OsTypeValues.SOLARIS,
             Windows_NT: OsTypeValues.WINDOWS,
-            'OS/390': OsTypeValues.ZOS,
+            'OS/390': OsTypeValues.Z_OS,
 
             'CYGWIN_NT-5.1': OsTypeValues.WINDOWS,
             'CYGWIN_NT-6.1': OsTypeValues.WINDOWS,
