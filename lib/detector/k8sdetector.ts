@@ -1,6 +1,6 @@
 import { promises } from 'fs';
 import { Detector, Resource, ResourceAttributes, ResourceDetectionConfig } from '@opentelemetry/resources';
-import { ResourceAttributes as SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { getContainerIDFormCGroup } from './utils';
 
 class K8sDetector implements Detector {

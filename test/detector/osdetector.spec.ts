@@ -1,6 +1,6 @@
 import os from 'os';
 import { ResourceDetectionConfig } from '@opentelemetry/resources';
-import { HostArchValues, OsTypeValues, ResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { HostArchValues, OsTypeValues, SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { osDetector } from '../../lib/detector/osdetector';
 
 const mockedArch = jest.spyOn(os, 'arch');
@@ -14,9 +14,9 @@ describe('OSDetector', () => {
     it('should retrieve host name, architecture and OS type', () => {
         return osDetector.detect(config).then((resource) => {
             expect(resource).toHaveProperty('attributes', expect.any(Object));
-            expect(resource.attributes).toHaveProperty([ResourceAttributes.HOST_NAME]);
-            expect(resource.attributes).toHaveProperty([ResourceAttributes.HOST_ARCH]);
-            expect(resource.attributes).toHaveProperty([ResourceAttributes.OS_TYPE]);
+            expect(resource.attributes).toHaveProperty([SemanticResourceAttributes.HOST_NAME]);
+            expect(resource.attributes).toHaveProperty([SemanticResourceAttributes.HOST_ARCH]);
+            expect(resource.attributes).toHaveProperty([SemanticResourceAttributes.OS_TYPE]);
             return true;
         });
     });
@@ -27,7 +27,7 @@ describe('OSDetector', () => {
             expect(resource).toHaveProperty(
                 'attributes',
                 expect.objectContaining({
-                    [ResourceAttributes.HOST_ARCH]: HostArchValues.ARM32,
+                    [SemanticResourceAttributes.HOST_ARCH]: HostArchValues.ARM32,
                 }),
             );
 
@@ -41,7 +41,7 @@ describe('OSDetector', () => {
             expect(resource).toHaveProperty(
                 'attributes',
                 expect.objectContaining({
-                    [ResourceAttributes.HOST_ARCH]: 's390',
+                    [SemanticResourceAttributes.HOST_ARCH]: 's390',
                 }),
             );
 
@@ -55,7 +55,7 @@ describe('OSDetector', () => {
             expect(resource).toHaveProperty(
                 'attributes',
                 expect.objectContaining({
-                    [ResourceAttributes.OS_TYPE]: OsTypeValues.LINUX,
+                    [SemanticResourceAttributes.OS_TYPE]: OsTypeValues.LINUX,
                 }),
             );
 
@@ -69,7 +69,7 @@ describe('OSDetector', () => {
             expect(resource).toHaveProperty(
                 'attributes',
                 expect.objectContaining({
-                    [ResourceAttributes.OS_TYPE]: 'MYSUPEROS',
+                    [SemanticResourceAttributes.OS_TYPE]: 'MYSUPEROS',
                 }),
             );
 

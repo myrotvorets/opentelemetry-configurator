@@ -1,14 +1,14 @@
 import { arch, hostname, type } from 'os';
 import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
-import { HostArchValues, OsTypeValues, ResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { HostArchValues, OsTypeValues, SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
 class OSDetector implements Detector {
     // eslint-disable-next-line class-methods-use-this
     public detect(_config: ResourceDetectionConfig): Promise<Resource> {
         const attrs = {
-            [ResourceAttributes.HOST_NAME]: hostname(),
-            [ResourceAttributes.HOST_ARCH]: OSDetector.mapArchitecture(arch()),
-            [ResourceAttributes.OS_TYPE]: OSDetector.mapOSType(type()),
+            [SemanticResourceAttributes.HOST_NAME]: hostname(),
+            [SemanticResourceAttributes.HOST_ARCH]: OSDetector.mapArchitecture(arch()),
+            [SemanticResourceAttributes.OS_TYPE]: OSDetector.mapOSType(type()),
         };
 
         return Promise.resolve(new Resource(attrs));

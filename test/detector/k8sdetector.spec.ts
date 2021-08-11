@@ -1,6 +1,6 @@
 import { promises } from 'fs';
 import { Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
-import { ResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { k8sDetector } from '../../lib/detector/k8sdetector';
 
 const mockedReadFile = jest.spyOn(promises, 'readFile');
@@ -47,12 +47,12 @@ describe('PackageJsonDetector', () => {
 
         return k8sDetector.detect(config).then((resource) =>
             expect(resource).toHaveProperty('attributes', {
-                [ResourceAttributes.HOST_NAME]: expectedHostname,
-                [ResourceAttributes.HOST_ID]: expectedUID,
-                [ResourceAttributes.K8S_POD_NAME]: expectedPod,
-                [ResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
-                [ResourceAttributes.K8S_NAMESPACE_NAME]: expectedNS,
-                [ResourceAttributes.CONTAINER_ID]: expectedCID,
+                [SemanticResourceAttributes.HOST_NAME]: expectedHostname,
+                [SemanticResourceAttributes.HOST_ID]: expectedUID,
+                [SemanticResourceAttributes.K8S_POD_NAME]: expectedPod,
+                [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
+                [SemanticResourceAttributes.K8S_NAMESPACE_NAME]: expectedNS,
+                [SemanticResourceAttributes.CONTAINER_ID]: expectedCID,
             }),
         );
     });
@@ -67,9 +67,9 @@ describe('PackageJsonDetector', () => {
 
         return k8sDetector.detect(config).then((resource) =>
             expect(resource).toHaveProperty('attributes', {
-                [ResourceAttributes.HOST_NAME]: expectedHostname,
-                [ResourceAttributes.K8S_POD_NAME]: expectedPod,
-                [ResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
+                [SemanticResourceAttributes.HOST_NAME]: expectedHostname,
+                [SemanticResourceAttributes.K8S_POD_NAME]: expectedPod,
+                [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
             }),
         );
     });

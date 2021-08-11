@@ -1,6 +1,6 @@
 import { promises } from 'fs';
 import { Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
-import { ResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { dockerDetector } from '../../lib/detector/dockerdetector';
 
 const mockedReadFile = jest.spyOn(promises, 'readFile');
@@ -13,7 +13,7 @@ const env = { ...process.env };
 
 function checkResource(resource: Resource, expectedID: string): void {
     expect(resource).toHaveProperty('attributes', expect.any(Object));
-    expect(resource.attributes).toHaveProperty([ResourceAttributes.CONTAINER_ID], expectedID);
+    expect(resource.attributes).toHaveProperty([SemanticResourceAttributes.CONTAINER_ID], expectedID);
 }
 
 describe('DockerDetector', () => {

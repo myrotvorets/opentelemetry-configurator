@@ -1,7 +1,7 @@
 import { promises } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
-import { ResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import debug from 'debug';
 
 const dbg = debug('otcfg');
@@ -14,8 +14,8 @@ class PackageJsonDetector implements Detector {
             const raw = await promises.readFile(file, { encoding: 'utf-8' });
             const json = JSON.parse(raw) as Record<string, unknown>;
             const attrs = {
-                [ResourceAttributes.SERVICE_NAME]: `${json.name}`,
-                [ResourceAttributes.SERVICE_VERSION]: `${json.version}`,
+                [SemanticResourceAttributes.SERVICE_NAME]: `${json.name}`,
+                [SemanticResourceAttributes.SERVICE_VERSION]: `${json.version}`,
             };
 
             return new Resource(attrs);
