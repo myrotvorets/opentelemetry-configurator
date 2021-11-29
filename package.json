@@ -48,7 +48,7 @@
     "@opentelemetry/resources": "^1.0.0",
     "@opentelemetry/semantic-conventions": "^1.0.0",
     "@opentelemetry/tracing": "^0.24.0",
-    "debug": "^4.3.1"
+    "debug": "^4.3.3"
   },
   "repository": {
     "type": "git",
