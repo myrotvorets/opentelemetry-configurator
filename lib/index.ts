@@ -1,4 +1,4 @@
-import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/node';
+import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { InstrumentationOption, registerInstrumentations } from '@opentelemetry/instrumentation';
 import {
     Detector,
@@ -7,7 +7,7 @@ import {
     detectResources,
     processDetector,
 } from '@opentelemetry/resources';
-import { BatchSpanProcessor, SimpleSpanProcessor, SpanExporter } from '@opentelemetry/tracing';
+import { BatchSpanProcessor, SimpleSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import debug from 'debug';

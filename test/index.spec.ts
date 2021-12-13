@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this, @typescript-eslint/no-empty-function */
 import { ExportResult, ExportResultCode } from '@opentelemetry/core';
-import { ReadableSpan, SpanExporter } from '@opentelemetry/tracing';
+import { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
 import { OpenTelemetryConfigurator } from '../lib/index';
 
