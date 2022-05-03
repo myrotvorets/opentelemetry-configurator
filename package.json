@@ -30,11 +30,11 @@
     "@types/debug": "^4.1.5",
     "@types/jest": "^27.0.1",
     "eslint-formatter-gha": "^1.0.2",
-    "jest": "^27.0.1",
+    "jest": "^28.0.0",
     "jest-github-actions-reporter": "^1.0.3",
     "jest-sonar-reporter": "^2.0.0",
     "merge": "^2.1.1",
-    "ts-jest": "^27.0.1",
+    "ts-jest": "^28.0.0",
     "ts-node": "^10.0.0",
     "typescript": "^4.1.3"
   },
