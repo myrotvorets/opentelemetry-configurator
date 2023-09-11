@@ -1,12 +1,12 @@
 /* eslint-disable class-methods-use-this, @typescript-eslint/no-empty-function */
 import { ExportResult, ExportResultCode } from '@opentelemetry/core';
 import { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
-import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { DetectorSync, IResource, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
 import { OpenTelemetryConfigurator } from '../lib/index';
 
-class MyDetector implements Detector {
-    public detect(_config: ResourceDetectionConfig): Promise<Resource> {
-        return Promise.resolve(Resource.empty());
+class MyDetector implements DetectorSync {
+    public detect(_config: ResourceDetectionConfig): IResource {
+        return Resource.empty();
     }
 }
 
@@ -38,7 +38,7 @@ describe('OpenTelemetryConfigurator', () => {
             traceExporter: exporter,
         });
 
-        await configurator.start();
+        configurator.start();
         const tracer = configurator.getTraceProvider();
         expect(tracer).not.toBeUndefined();
 
@@ -46,7 +46,7 @@ describe('OpenTelemetryConfigurator', () => {
         expect(mockedShutdown).toHaveBeenCalledTimes(1);
     });
 
-    it('should not reinitialize tracer multiple times', async () => {
+    it('should not reinitialize tracer multiple times', () => {
         const detector = new MyDetector();
 
         const mockedDetect = jest.spyOn(detector, 'detect');
@@ -57,13 +57,13 @@ describe('OpenTelemetryConfigurator', () => {
             detectors: [detector],
         });
 
-        await configurator.start();
-        await configurator.start();
+        configurator.start();
+        configurator.start();
 
         expect(mockedDetect).toHaveBeenCalledTimes(1);
     });
 
-    it('should shut down on a termination signal', async () => {
+    it('should shut down on a termination signal', () => {
         const exporter = new MySpanExporter();
 
         const configurator = new OpenTelemetryConfigurator({
@@ -72,7 +72,7 @@ describe('OpenTelemetryConfigurator', () => {
             traceExporter: exporter,
         });
 
-        await configurator.start();
+        configurator.start();
         let tracer = configurator.getTraceProvider();
         expect(tracer).not.toBeUndefined();
 
@@ -93,7 +93,7 @@ describe('OpenTelemetryConfigurator', () => {
             traceExporter: exporter,
         });
 
-        await configurator.start();
+        configurator.start();
         await configurator.shutdown();
         await configurator.shutdown();
         expect(mockedShutdown).toHaveBeenCalledTimes(1);

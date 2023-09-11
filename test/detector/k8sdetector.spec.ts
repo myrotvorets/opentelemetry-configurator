@@ -1,7 +1,8 @@
-import { promises } from 'fs';
-import { Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { promises } from 'node:fs';
+import { ResourceDetectionConfig } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { k8sDetector } from '../../lib/detector/k8sdetector';
+import { runDetector } from './helpers';
 
 const mockedReadFile = jest.spyOn(promises, 'readFile');
 
@@ -20,7 +21,7 @@ describe('PackageJsonDetector', () => {
 
     it('should return an empty resource if this is not a K8S', () => {
         process.env.HOSTNAME = '';
-        return expect(k8sDetector.detect(config)).resolves.toBe(Resource.empty());
+        return expect(runDetector(k8sDetector, config)).resolves.toHaveProperty('attributes', {});
     });
 
     it('should properly extract information', () => {
@@ -45,16 +46,14 @@ describe('PackageJsonDetector', () => {
 
         process.env.HOSTNAME = expectedHostname;
 
-        return k8sDetector.detect(config).then((resource) =>
-            expect(resource).toHaveProperty('attributes', {
-                [SemanticResourceAttributes.HOST_NAME]: expectedHostname,
-                [SemanticResourceAttributes.HOST_ID]: expectedUID,
-                [SemanticResourceAttributes.K8S_POD_NAME]: expectedPod,
-                [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
-                [SemanticResourceAttributes.K8S_NAMESPACE_NAME]: expectedNS,
-                [SemanticResourceAttributes.CONTAINER_ID]: expectedCID,
-            }),
-        );
+        return expect(runDetector(k8sDetector, config)).resolves.toHaveProperty('attributes', {
+            [SemanticResourceAttributes.HOST_NAME]: expectedHostname,
+            [SemanticResourceAttributes.HOST_ID]: expectedUID,
+            [SemanticResourceAttributes.K8S_POD_NAME]: expectedPod,
+            [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
+            [SemanticResourceAttributes.K8S_NAMESPACE_NAME]: expectedNS,
+            [SemanticResourceAttributes.CONTAINER_ID]: expectedCID,
+        });
     });
 
     it('should discard empty values', () => {
@@ -65,12 +64,10 @@ describe('PackageJsonDetector', () => {
         mockedReadFile.mockRejectedValue(new Error());
         process.env.HOSTNAME = expectedHostname;
 
-        return k8sDetector.detect(config).then((resource) =>
-            expect(resource).toHaveProperty('attributes', {
-                [SemanticResourceAttributes.HOST_NAME]: expectedHostname,
-                [SemanticResourceAttributes.K8S_POD_NAME]: expectedPod,
-                [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
-            }),
-        );
+        return expect(runDetector(k8sDetector, config)).resolves.toHaveProperty('attributes', {
+            [SemanticResourceAttributes.HOST_NAME]: expectedHostname,
+            [SemanticResourceAttributes.K8S_POD_NAME]: expectedPod,
+            [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: expectedDeployment,
+        });
     });
 });

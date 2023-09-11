@@ -1,7 +1,8 @@
-import { promises } from 'fs';
-import { Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { promises } from 'node:fs';
+import { ResourceDetectionConfig } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { dockerDetector } from '../../lib/detector/dockerdetector';
+import { runDetector } from './helpers';
 
 const mockedReadFile = jest.spyOn(promises, 'readFile');
 
@@ -11,11 +12,6 @@ const config: ResourceDetectionConfig = {
 
 const env = { ...process.env };
 
-function checkResource(resource: Resource, expectedID: string): void {
-    expect(resource).toHaveProperty('attributes', expect.any(Object));
-    expect(resource.attributes).toHaveProperty([SemanticResourceAttributes.CONTAINER_ID], expectedID);
-}
-
 describe('DockerDetector', () => {
     afterEach(() => {
         process.env = { ...env };
@@ -23,12 +19,12 @@ describe('DockerDetector', () => {
 
     it('should return an empty resource when /proc/self/cgroup is not readable', () => {
         mockedReadFile.mockRejectedValueOnce(new Error());
-        return expect(dockerDetector.detect(config)).resolves.toBe(Resource.empty());
+        return expect(runDetector(dockerDetector, config)).resolves.toHaveProperty('attributes', {});
     });
 
     it('should return an empty resource if this is not a Docker', () => {
         mockedReadFile.mockResolvedValueOnce('');
-        return expect(dockerDetector.detect(config)).resolves.toBe(Resource.empty());
+        return expect(runDetector(dockerDetector, config)).resolves.toHaveProperty('attributes', {});
     });
 
     it('should extract container ID from /proc/self/cgroup', () => {
@@ -37,6 +33,8 @@ describe('DockerDetector', () => {
 
         mockedReadFile.mockResolvedValueOnce(`11:cpu,cpuacct:/docker/${containerID}\n`);
 
-        return dockerDetector.detect(config).then((resource) => checkResource(resource, expectedID));
+        return expect(runDetector(dockerDetector, config)).resolves.toHaveProperty('attributes', {
+            [SemanticResourceAttributes.CONTAINER_ID]: expectedID,
+        });
     });
 });

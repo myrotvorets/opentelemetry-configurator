@@ -1,14 +1,13 @@
 import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { InstrumentationOption, registerInstrumentations } from '@opentelemetry/instrumentation';
 import {
-    Detector,
+    DetectorSync,
     Resource,
     ResourceDetectionConfig,
-    detectResources,
+    detectResourcesSync,
     processDetector,
 } from '@opentelemetry/resources';
 import { BatchSpanProcessor, SimpleSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import debug from 'debug';
 import { packageJsonDetector } from './detector/packagejsondetector';
@@ -22,7 +21,7 @@ export interface Config {
     serviceName: string;
     resource?: Resource;
     tracer?: Omit<NodeTracerConfig, 'plugins' | 'resource'>;
-    detectors?: Detector[];
+    detectors?: DetectorSync[];
     traceExporter?: SpanExporter;
     instrumentations?: InstrumentationOption[];
 }
@@ -55,12 +54,12 @@ export class OpenTelemetryConfigurator {
         this.instrumentations = config.instrumentations;
     }
 
-    public async start(): Promise<void> {
+    public start(): void {
         if (this.tracerProvider) {
             return;
         }
 
-        await this.detectResources();
+        this.detectResources();
         this.tracerProvider = new NodeTracerProvider(this.nodeTracerConfig);
 
         if (this.traceExporter) {
@@ -105,8 +104,8 @@ export class OpenTelemetryConfigurator {
         this.shutdown().catch((e) => console.error(e));
     };
 
-    private async detectResources(): Promise<void> {
-        const resource = await detectResources(this.resourceDetectionConfig);
+    private detectResources(): void {
+        const resource = detectResourcesSync(this.resourceDetectionConfig);
         dbg(resource);
         this.nodeTracerConfig.resource = (this.nodeTracerConfig.resource as Resource).merge(resource);
     }
@@ -125,12 +124,6 @@ export class OpenTelemetryConfigurator {
                 url: process.env.ZIPKIN_ENDPOINT,
                 serviceName,
             });
-        }
-
-        // istanbul ignore if
-        if (process.env.JAEGER_AGENT_HOST || process.env.JAEGER_ENDPOINT) {
-            // See https://github.com/jaegertracing/jaeger-client-node#environment-variables
-            return new JaegerExporter();
         }
 
         return undefined;
