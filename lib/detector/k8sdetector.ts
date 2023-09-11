@@ -1,16 +1,32 @@
-import { promises } from 'fs';
-import { Detector, Resource, ResourceAttributes, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { readFile } from 'node:fs/promises';
+import {
+    DetectorSync,
+    IResource,
+    Resource,
+    ResourceAttributes,
+    ResourceDetectionConfig,
+} from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { getContainerIDFormCGroup } from './utils';
 
-class K8sDetector implements Detector {
+class K8sDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
-    public async detect(_config: ResourceDetectionConfig): Promise<Resource> {
+    public detect(_config: ResourceDetectionConfig): IResource {
         const matches = /^(.*)-([a-f0-9]+)-([a-z0-9]{5})$/u.exec(process.env.HOSTNAME || '');
         if (!matches) {
             return Resource.empty();
         }
 
+        const attrs = {
+            [SemanticResourceAttributes.HOST_NAME]: process.env.HOSTNAME as string,
+            [SemanticResourceAttributes.K8S_POD_NAME]: matches[1],
+            [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: matches[2],
+        };
+
+        return new Resource(attrs, K8sDetector.getAsyncAttributes());
+    }
+
+    private static async getAsyncAttributes(): Promise<ResourceAttributes> {
         const [uid, cid, ns] = await Promise.all([
             K8sDetector.getUID(),
             K8sDetector.getContainerID(),
@@ -18,16 +34,12 @@ class K8sDetector implements Detector {
         ]);
 
         const attrs = {
-            [SemanticResourceAttributes.HOST_NAME]: process.env.HOSTNAME as string,
             [SemanticResourceAttributes.HOST_ID]: uid,
-            [SemanticResourceAttributes.K8S_POD_NAME]: matches[1],
-            [SemanticResourceAttributes.K8S_DEPLOYMENT_NAME]: matches[2],
             [SemanticResourceAttributes.K8S_NAMESPACE_NAME]: ns,
             [SemanticResourceAttributes.CONTAINER_ID]: cid,
         };
 
-        const cleaned = K8sDetector.cleanUpAttributes(attrs);
-        return new Resource(cleaned);
+        return K8sDetector.cleanUpAttributes(attrs);
     }
 
     private static getContainerID(): Promise<string> {
@@ -46,7 +58,7 @@ class K8sDetector implements Detector {
 
     private static async readFile(name: string): Promise<string> {
         try {
-            return (await promises.readFile(name, { encoding: 'ascii' })).trim();
+            return (await readFile(name, { encoding: 'ascii' })).trim();
         } catch (e) {
             return '';
         }
@@ -65,4 +77,4 @@ class K8sDetector implements Detector {
     }
 }
 
-export const k8sDetector: Detector = new K8sDetector();
+export const k8sDetector = new K8sDetector();

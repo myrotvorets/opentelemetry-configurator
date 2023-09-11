@@ -1,20 +1,28 @@
-import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import {
+    DetectorSync,
+    IResource,
+    Resource,
+    ResourceAttributes,
+    ResourceDetectionConfig,
+} from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { getContainerIDFormCGroup } from './utils';
 
-class DockerDetector implements Detector {
+class DockerDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
-    public async detect(_config: ResourceDetectionConfig): Promise<Resource> {
+    public detect(_config: ResourceDetectionConfig): IResource {
+        return new Resource({}, DockerDetector.getAsyncAttributes());
+    }
+
+    private static async getAsyncAttributes(): Promise<ResourceAttributes> {
         const cid = await DockerDetector.getContainerID();
         if (cid) {
-            const attrs = {
+            return {
                 [SemanticResourceAttributes.CONTAINER_ID]: cid,
             };
-
-            return new Resource(attrs);
         }
 
-        return Resource.empty();
+        return {};
     }
 
     private static getContainerID(): Promise<string> {
@@ -22,4 +30,4 @@ class DockerDetector implements Detector {
     }
 }
 
-export const dockerDetector: Detector = new DockerDetector();
+export const dockerDetector = new DockerDetector();

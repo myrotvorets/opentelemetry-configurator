@@ -1,17 +1,17 @@
-import { arch, hostname, type } from 'os';
-import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { arch, hostname, type } from 'node:os';
+import { DetectorSync, IResource, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
 import { HostArchValues, OsTypeValues, SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-class OSDetector implements Detector {
+class OSDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
-    public detect(_config: ResourceDetectionConfig): Promise<Resource> {
+    public detect(_config: ResourceDetectionConfig): IResource {
         const attrs = {
             [SemanticResourceAttributes.HOST_NAME]: hostname(),
             [SemanticResourceAttributes.HOST_ARCH]: OSDetector.mapArchitecture(arch()),
             [SemanticResourceAttributes.OS_TYPE]: OSDetector.mapOSType(type()),
         };
 
-        return Promise.resolve(new Resource(attrs));
+        return new Resource(attrs);
     }
 
     private static mapArchitecture(architecture: string): string {
@@ -52,4 +52,4 @@ class OSDetector implements Detector {
     }
 }
 
-export const osDetector: Detector = new OSDetector();
+export const osDetector = new OSDetector();

@@ -1,29 +1,35 @@
-import { promises } from 'fs';
-import { dirname, join, resolve } from 'path';
-import { Detector, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { readFile, stat } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import {
+    DetectorSync,
+    IResource,
+    Resource,
+    ResourceAttributes,
+    ResourceDetectionConfig,
+} from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import debug from 'debug';
 
 const dbg = debug('otcfg');
 
-class PackageJsonDetector implements Detector {
+class PackageJsonDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
-    public async detect(_config: ResourceDetectionConfig): Promise<Resource> {
+    public detect(_config: ResourceDetectionConfig): IResource {
+        return new Resource({}, PackageJsonDetector.getAsyncAttributes());
+    }
+
+    private static async getAsyncAttributes(): Promise<ResourceAttributes> {
         try {
             const file = await PackageJsonDetector.findPackageJson();
-            const raw = await promises.readFile(file, { encoding: 'utf-8' });
+            const raw = await readFile(file, { encoding: 'utf-8' });
             const json = JSON.parse(raw) as Record<string, unknown>;
-            const attrs = {
+            return {
                 [SemanticResourceAttributes.SERVICE_NAME]: `${json.name}`,
                 [SemanticResourceAttributes.SERVICE_VERSION]: `${json.version}`,
             };
-
-            return new Resource(attrs);
         } catch (e) {
-            // Do nothing
+            return {};
         }
-
-        return Resource.empty();
     }
 
     private static async findPackageJson(): Promise<string> {
@@ -58,7 +64,7 @@ class PackageJsonDetector implements Detector {
 
     private static async fileExists(path: string): Promise<boolean> {
         try {
-            const stats = await promises.stat(path);
+            const stats = await stat(path);
             return stats.isFile();
         } catch (e) {
             return false;
@@ -66,4 +72,4 @@ class PackageJsonDetector implements Detector {
     }
 }
 
-export const packageJsonDetector: Detector = new PackageJsonDetector();
+export const packageJsonDetector = new PackageJsonDetector();
