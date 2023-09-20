@@ -1,19 +1,19 @@
-import { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { InstrumentationOption, registerInstrumentations } from '@opentelemetry/instrumentation';
+import { type NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { type InstrumentationOption, registerInstrumentations } from '@opentelemetry/instrumentation';
 import {
-    DetectorSync,
+    type DetectorSync,
     Resource,
-    ResourceDetectionConfig,
+    type ResourceDetectionConfig,
     detectResourcesSync,
     processDetector,
 } from '@opentelemetry/resources';
 import { BatchSpanProcessor, SimpleSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import debug from 'debug';
-import { packageJsonDetector } from './detector/packagejsondetector';
-import { k8sDetector } from './detector/k8sdetector';
-import { dockerDetector } from './detector/dockerdetector';
-import { osDetector } from './detector/osdetector';
+import { packageJsonDetector } from './detector/packagejsondetector.mjs';
+import { k8sDetector } from './detector/k8sdetector.mjs';
+import { dockerDetector } from './detector/dockerdetector.mjs';
+import { osDetector } from './detector/osdetector.mjs';
 
 const dbg = debug('otcfg');
 
@@ -36,8 +36,8 @@ export class OpenTelemetryConfigurator {
 
     public constructor(config: Config) {
         this.nodeTracerConfig = {
-            ...(config.tracer || {}),
-            resource: config.resource || Resource.empty(),
+            ...(config.tracer ?? {}),
+            resource: config.resource ?? Resource.empty(),
         };
 
         this.resourceDetectionConfig = {
@@ -73,7 +73,6 @@ export class OpenTelemetryConfigurator {
             tracerProvider: this.tracerProvider,
         });
 
-        // istanbul ignore next
         dbg(this.tracerProvider.resource?.attributes);
 
         process.once('SIGINT', this.shutdownHandler);
@@ -118,13 +117,14 @@ export class OpenTelemetryConfigurator {
             return traceExporter;
         }
 
-        // istanbul ignore if
+        /* c8 ignore start */
         if (process.env.ZIPKIN_ENDPOINT) {
             return new ZipkinExporter({
                 url: process.env.ZIPKIN_ENDPOINT,
                 serviceName,
             });
         }
+        /* c8 ignore end */
 
         return undefined;
     }
