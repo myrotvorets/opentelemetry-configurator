@@ -3,7 +3,7 @@
   "version": "4.0.0",
   "description": "Configures OpenTelemetry for our microservices",
   "type": "module",
-  "exports": "./dist/lib/index.mts",
+  "exports": "./dist/lib/index.mjs",
   "scripts": {
     "build": "tsc",
     "lint": "eslint -f gha .",
