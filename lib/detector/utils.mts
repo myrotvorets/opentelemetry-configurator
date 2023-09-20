@@ -1,8 +1,8 @@
-import { promises } from 'fs';
+import { readFile } from 'node:fs/promises';
 
 export async function getContainerIDFormCGroup(re: RegExp): Promise<string> {
     try {
-        const raw = await promises.readFile('/proc/self/cgroup', { encoding: 'ascii' });
+        const raw = await readFile('/proc/self/cgroup', { encoding: 'ascii' });
         const lines = raw.trim().split('\n');
         for (const line of lines) {
             const matches = re.exec(line);
@@ -10,7 +10,7 @@ export async function getContainerIDFormCGroup(re: RegExp): Promise<string> {
                 return matches[1];
             }
         }
-    } catch (e) {
+    } catch {
         // Do nothing
     }
 

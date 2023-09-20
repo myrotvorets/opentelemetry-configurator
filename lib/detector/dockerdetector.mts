@@ -1,14 +1,14 @@
 import {
-    DetectorSync,
-    IResource,
+    type DetectorSync,
+    type IResource,
     Resource,
-    ResourceAttributes,
-    ResourceDetectionConfig,
+    type ResourceAttributes,
+    type ResourceDetectionConfig,
 } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { getContainerIDFormCGroup } from './utils';
+import { getContainerIDFormCGroup } from './utils.mjs';
 
-class DockerDetector implements DetectorSync {
+export class DockerDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
     public detect(_config: ResourceDetectionConfig): IResource {
         return new Resource({}, DockerDetector.getAsyncAttributes());

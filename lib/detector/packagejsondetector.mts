@@ -1,18 +1,18 @@
 import { readFile, stat } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import {
-    DetectorSync,
-    IResource,
+    type DetectorSync,
+    type IResource,
     Resource,
-    ResourceAttributes,
-    ResourceDetectionConfig,
+    type ResourceAttributes,
+    type ResourceDetectionConfig,
 } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import debug from 'debug';
 
 const dbg = debug('otcfg');
 
-class PackageJsonDetector implements DetectorSync {
+export class PackageJsonDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
     public detect(_config: ResourceDetectionConfig): IResource {
         return new Resource({}, PackageJsonDetector.getAsyncAttributes());
@@ -27,7 +27,7 @@ class PackageJsonDetector implements DetectorSync {
                 [SemanticResourceAttributes.SERVICE_NAME]: `${json.name}`,
                 [SemanticResourceAttributes.SERVICE_VERSION]: `${json.version}`,
             };
-        } catch (e) {
+        } catch {
             return {};
         }
     }
@@ -35,25 +35,24 @@ class PackageJsonDetector implements DetectorSync {
     private static async findPackageJson(): Promise<string> {
         const locations = PackageJsonDetector.getLocations();
         for (const location of locations) {
-            dbg('PackageJsonDetector: trying', location);
+            dbg('PackageJsonDetector: trying %s', location);
             // eslint-disable-next-line no-await-in-loop
             if (await PackageJsonDetector.fileExists(location)) {
-                dbg('PackageJsonDetector: found', location);
+                dbg('PackageJsonDetector: found at %s', location);
                 return location;
             }
         }
 
+        dbg('PackageJsonDetector: failed to find package.json');
         throw new Error();
     }
 
     private static getLocations(): string[] {
         const locations: string[] = [];
         // istanbul ignore next
-        if (require.main?.filename) {
-            locations.push(
-                join(dirname(require.main.filename), 'package.json'),
-                join(dirname(require.main.filename), '..', 'package.json'),
-            );
+        if (process.argv[1]) {
+            const dir = basename(process.argv[1]);
+            locations.push(join(dir, 'package.json'), join(dir, '..', 'package.json'));
         }
 
         const cwd = process.cwd();
@@ -66,7 +65,7 @@ class PackageJsonDetector implements DetectorSync {
         try {
             const stats = await stat(path);
             return stats.isFile();
-        } catch (e) {
+        } catch {
             return false;
         }
     }

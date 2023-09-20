@@ -1,8 +1,8 @@
 import { arch, hostname, type } from 'node:os';
-import { DetectorSync, IResource, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
+import { type DetectorSync, type IResource, Resource, type ResourceDetectionConfig } from '@opentelemetry/resources';
 import { HostArchValues, OsTypeValues, SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-class OSDetector implements DetectorSync {
+export class OSDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
     public detect(_config: ResourceDetectionConfig): IResource {
         const attrs = {

@@ -1,8 +1,11 @@
 /* eslint-disable class-methods-use-this, @typescript-eslint/no-empty-function */
-import { ExportResult, ExportResultCode } from '@opentelemetry/core';
-import { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
-import { DetectorSync, IResource, Resource, ResourceDetectionConfig } from '@opentelemetry/resources';
-import { OpenTelemetryConfigurator } from '../lib/index';
+import { afterEach, describe, it } from 'mocha';
+import { expect } from 'chai';
+import * as td from 'testdouble';
+import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
+import { type ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
+import { type DetectorSync, type IResource, Resource, type ResourceDetectionConfig } from '@opentelemetry/resources';
+import { OpenTelemetryConfigurator } from '../lib/index.mjs';
 
 class MyDetector implements DetectorSync {
     public detect(_config: ResourceDetectionConfig): IResource {
@@ -11,7 +14,7 @@ class MyDetector implements DetectorSync {
 }
 
 class MySpanExporter implements SpanExporter {
-    public export(spans: ReadableSpan[], resultCallback: (result: ExportResult) => void): void {
+    public export(_spans: ReadableSpan[], resultCallback: (result: ExportResult) => void): void {
         resultCallback({ code: ExportResultCode.SUCCESS });
     }
 
@@ -20,17 +23,17 @@ class MySpanExporter implements SpanExporter {
     }
 }
 
-const env = { ...process.env };
-
 describe('OpenTelemetryConfigurator', () => {
+    const env = { ...process.env } as const;
+
     afterEach(() => {
         process.env = { ...env };
     });
 
     it('should pass a basic test', async () => {
         const exporter = new MySpanExporter();
-
-        const mockedShutdown = jest.spyOn(exporter, 'shutdown');
+        const shutdownSpy = td.func();
+        td.replace(exporter, 'shutdown', shutdownSpy);
 
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
@@ -40,16 +43,16 @@ describe('OpenTelemetryConfigurator', () => {
 
         configurator.start();
         const tracer = configurator.getTraceProvider();
-        expect(tracer).not.toBeUndefined();
+        expect(tracer).not.to.be.undefined;
 
         await configurator.shutdown();
-        expect(mockedShutdown).toHaveBeenCalledTimes(1);
+        expect(td.explain(shutdownSpy).callCount).to.equal(1);
     });
 
     it('should not reinitialize tracer multiple times', () => {
         const detector = new MyDetector();
-
-        const mockedDetect = jest.spyOn(detector, 'detect');
+        const detectSpy = td.func();
+        td.replace(detector, 'detect', detectSpy);
 
         process.env = {};
         const configurator = new OpenTelemetryConfigurator({
@@ -60,7 +63,7 @@ describe('OpenTelemetryConfigurator', () => {
         configurator.start();
         configurator.start();
 
-        expect(mockedDetect).toHaveBeenCalledTimes(1);
+        expect(td.explain(detectSpy).callCount).to.equal(1);
     });
 
     it('should shut down on a termination signal', () => {
@@ -74,18 +77,18 @@ describe('OpenTelemetryConfigurator', () => {
 
         configurator.start();
         let tracer = configurator.getTraceProvider();
-        expect(tracer).not.toBeUndefined();
+        expect(tracer).not.to.be.undefined;
 
         process.emit('SIGTERM', 'SIGTERM');
 
         tracer = configurator.getTraceProvider();
-        expect(tracer).toBeUndefined();
+        expect(tracer).to.be.undefined;
     });
 
     it('should handle double shutdown', async () => {
         const exporter = new MySpanExporter();
-
-        const mockedShutdown = jest.spyOn(exporter, 'shutdown');
+        const shutdownSpy = td.func();
+        td.replace(exporter, 'shutdown', shutdownSpy);
 
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
@@ -96,6 +99,6 @@ describe('OpenTelemetryConfigurator', () => {
         configurator.start();
         await configurator.shutdown();
         await configurator.shutdown();
-        expect(mockedShutdown).toHaveBeenCalledTimes(1);
+        expect(td.explain(shutdownSpy).callCount).to.equal(1);
     });
 });

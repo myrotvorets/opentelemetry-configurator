@@ -1,18 +1,18 @@
 import { readFile } from 'node:fs/promises';
 import {
-    DetectorSync,
-    IResource,
+    type DetectorSync,
+    type IResource,
     Resource,
-    ResourceAttributes,
-    ResourceDetectionConfig,
+    type ResourceAttributes,
+    type ResourceDetectionConfig,
 } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { getContainerIDFormCGroup } from './utils';
+import { getContainerIDFormCGroup } from './utils.mjs';
 
-class K8sDetector implements DetectorSync {
+export class K8sDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
     public detect(_config: ResourceDetectionConfig): IResource {
-        const matches = /^(.*)-([a-f0-9]+)-([a-z0-9]{5})$/u.exec(process.env.HOSTNAME || '');
+        const matches = /^(.*)-([a-f0-9]+)-([a-z0-9]{5})$/u.exec(process.env.HOSTNAME ?? '');
         if (!matches) {
             return Resource.empty();
         }
@@ -59,7 +59,7 @@ class K8sDetector implements DetectorSync {
     private static async readFile(name: string): Promise<string> {
         try {
             return (await readFile(name, { encoding: 'ascii' })).trim();
-        } catch (e) {
+        } catch {
             return '';
         }
     }
