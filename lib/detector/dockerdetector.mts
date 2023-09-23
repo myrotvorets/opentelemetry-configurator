@@ -6,7 +6,7 @@ import {
     type ResourceDetectionConfig,
 } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { getContainerIDFormCGroup } from './utils.mjs';
+import { getContainerIDFormCGroup, getContainerIDFormCGroup2 } from './utils.mjs';
 
 export class DockerDetector implements DetectorSync {
     // eslint-disable-next-line class-methods-use-this
@@ -25,8 +25,11 @@ export class DockerDetector implements DetectorSync {
         return {};
     }
 
-    private static getContainerID(): Promise<string> {
-        return getContainerIDFormCGroup(/\/docker\/([0-9a-f]{12})[0-9a-f]{52}$/u);
+    private static async getContainerID(): Promise<string> {
+        return (
+            (await getContainerIDFormCGroup(/\/docker\/([0-9a-f]{12})[0-9a-f]{52}$/u)) ||
+            getContainerIDFormCGroup2(/\/containers\/([0-9a-f]{12})[0-9a-f]{52}\//u)
+        );
     }
 }
 
