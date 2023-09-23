@@ -59,4 +59,20 @@ describe('DockerDetector', () => {
                 [SemanticResourceAttributes.CONTAINER_ID]: expectedID,
             });
     });
+
+    it('should fall back to /proc/self/mountinfo', () => {
+        const containerID = 'ec476b266b2148cb1adc1ca6399f9cffc1c28b24e68d6d68c50db7e981d2ae1d';
+        const expectedID = containerID.slice(0, 12);
+
+        td.when(readFileMock('/proc/self/cgroup', { encoding: 'ascii' })).thenResolve(`0::/\n`);
+        td.when(readFileMock('/proc/self/mountinfo', { encoding: 'ascii' })).thenResolve(
+            `920 908 7:3 /containers/${containerID}/resolv.conf /etc/resolv.conf rw,nodev,relatime - ext4 /dev/loop3 rw\n`,
+        );
+
+        return expect(runDetector(dockerDetector, config))
+            .to.eventually.be.an('object')
+            .and.have.deep.property('attributes', {
+                [SemanticResourceAttributes.CONTAINER_ID]: expectedID,
+            });
+    });
 });

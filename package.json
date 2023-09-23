@@ -10,6 +10,7 @@
     "lint:fix": "eslint --fix .",
     "pretest": "npm run lint",
     "test": "mocha test",
+    "pretest:coverage": "npm run lint",
     "test:coverage": "c8 mocha test",
     "posttest": "npm run build",
     "prepack": "npm run build"
