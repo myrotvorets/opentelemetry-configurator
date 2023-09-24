@@ -1,15 +1,19 @@
-import { type NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { type ContextManager, DiagConsoleLogger, type TextMapPropagator, diag } from '@opentelemetry/api';
+import { getEnvWithoutDefaults } from '@opentelemetry/core';
 import { type InstrumentationOption, registerInstrumentations } from '@opentelemetry/instrumentation';
+import { BatchSpanProcessor, SimpleSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base';
+import { type NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import {
     type DetectorSync,
+    type IResource,
     Resource,
     type ResourceDetectionConfig,
     detectResourcesSync,
     processDetector,
 } from '@opentelemetry/resources';
-import { BatchSpanProcessor, SimpleSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import debug from 'debug';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { packageJsonDetector } from './detector/packagejsondetector.mjs';
 import { k8sDetector } from './detector/k8sdetector.mjs';
 import { dockerDetector } from './detector/dockerdetector.mjs';
@@ -19,22 +23,37 @@ const dbg = debug('otcfg');
 
 export interface Config {
     serviceName: string;
-    resource?: Resource;
-    tracer?: Omit<NodeTracerConfig, 'plugins' | 'resource'>;
-    detectors?: DetectorSync[];
-    traceExporter?: SpanExporter;
     instrumentations?: InstrumentationOption[];
+    resource?: IResource;
+    detectors?: DetectorSync[];
+    tracer?: Omit<NodeTracerConfig, 'plugins' | 'resource'>;
+    traceExporter?: SpanExporter;
+    contextManager?: ContextManager;
+    propagator?: TextMapPropagator;
 }
 
 export class OpenTelemetryConfigurator {
+    private readonly serviceName: string;
     private tracerProvider?: NodeTracerProvider;
     private readonly nodeTracerConfig: NodeTracerConfig;
     private readonly resourceDetectionConfig: ResourceDetectionConfig;
     private readonly traceExporter?: SpanExporter;
     private readonly instrumentations?: InstrumentationOption[];
+    private readonly contextManager?: ContextManager;
+    private readonly propagator?: TextMapPropagator;
     private unloader?: () => void;
 
     public constructor(config: Config) {
+        this.serviceName = config.serviceName;
+
+        const envWithoutDefaults = getEnvWithoutDefaults();
+
+        if (envWithoutDefaults.OTEL_LOG_LEVEL) {
+            diag.setLogger(new DiagConsoleLogger(), {
+                logLevel: envWithoutDefaults.OTEL_LOG_LEVEL,
+            });
+        }
+
         this.nodeTracerConfig = {
             ...(config.tracer ?? {}),
             resource: config.resource ?? Resource.empty(),
@@ -52,12 +71,18 @@ export class OpenTelemetryConfigurator {
 
         this.traceExporter = OpenTelemetryConfigurator.getTraceExporter(config.serviceName, config.traceExporter);
         this.instrumentations = config.instrumentations;
+        this.contextManager = config.contextManager;
+        this.propagator = config.propagator;
     }
 
     public start(): void {
         if (this.tracerProvider) {
             return;
         }
+
+        this.unloader = registerInstrumentations({
+            instrumentations: this.instrumentations,
+        });
 
         this.detectResources();
         this.tracerProvider = new NodeTracerProvider(this.nodeTracerConfig);
@@ -67,10 +92,9 @@ export class OpenTelemetryConfigurator {
             this.tracerProvider.addSpanProcessor(new SpanProcessor(this.traceExporter));
         }
 
-        this.tracerProvider.register();
-        this.unloader = registerInstrumentations({
-            instrumentations: this.instrumentations,
-            tracerProvider: this.tracerProvider,
+        this.tracerProvider.register({
+            contextManager: this.contextManager,
+            propagator: this.propagator,
         });
 
         dbg(this.tracerProvider.resource?.attributes);
@@ -104,9 +128,17 @@ export class OpenTelemetryConfigurator {
     };
 
     private detectResources(): void {
-        const resource = detectResourcesSync(this.resourceDetectionConfig);
-        dbg(resource);
-        this.nodeTracerConfig.resource = (this.nodeTracerConfig.resource as Resource).merge(resource);
+        if (this.resourceDetectionConfig.detectors?.length) {
+            const resource = detectResourcesSync(this.resourceDetectionConfig);
+            dbg(resource);
+            this.nodeTracerConfig.resource = (this.nodeTracerConfig.resource as Resource).merge(resource);
+        }
+
+        (this.nodeTracerConfig.resource as Resource).merge(
+            new Resource({
+                [SemanticResourceAttributes.SERVICE_NAME]: this.serviceName,
+            }),
+        );
     }
 
     private static getTraceExporter(
@@ -118,9 +150,12 @@ export class OpenTelemetryConfigurator {
         }
 
         /* c8 ignore start */
-        if (process.env.ZIPKIN_ENDPOINT) {
+        if (process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT || process.env.ZIPKIN_ENDPOINT) {
+            // Environment variables:
+            // OTEL_EXPORTER_ZIPKIN_ENDPOINT (ZIPKIN_ENDPOINT): Endpoint for Zipkin traces
+            // OTEL_EXPORTER_ZIPKIN_TIMEOUT: Maximum time the Zipkin exporter will wait for each batch export (10s by default)
             return new ZipkinExporter({
-                url: process.env.ZIPKIN_ENDPOINT,
+                url: process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT ?? process.env.ZIPKIN_ENDPOINT,
                 serviceName,
             });
         }
