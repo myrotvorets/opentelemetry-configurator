@@ -17,11 +17,16 @@ permissions:
 jobs:
   prepare:
     name: Prepare source code
+    permissions:
+      contents: read
+      packages: read
     runs-on: ubuntu-latest
     if: github.event_name == 'release' || github.event.inputs.gpr == 'yes'
     steps:
       - name: Prepare source
         uses: myrotvorets/composite-actions/node-prepublish@master
+        with:
+          registry-url: https://npm.pkg.github.com
 
   publish:
     name: Publish package (${{ matrix.registry }})

@@ -18,10 +18,7 @@
   "files": [
     "dist/lib/index.d.mts",
     "dist/lib/index.mjs",
-    "dist/lib/index.mjs.map",
-    "dist/lib/*/*.d.mts",
-    "dist/lib/*/*.mjs",
-    "dist/lib/*/*.mjs.map"
+    "dist/lib/index.mjs.map"
   ],
   "typings": "dist/lib/index.d.mts",
   "keywords": [],
@@ -48,14 +45,10 @@
   },
   "dependencies": {
     "@myrotvorets/opentelemetry-resource-detectors": "^1.0.0",
-    "@opentelemetry/api": "^1.0.1",
-    "@opentelemetry/core": "^1.0.0",
     "@opentelemetry/exporter-zipkin": "^1.0.0",
-    "@opentelemetry/instrumentation": "^0.43.0",
     "@opentelemetry/resources": "^1.0.0",
-    "@opentelemetry/sdk-trace-base": "^1.0.1",
-    "@opentelemetry/sdk-trace-node": "^1.0.1",
-    "@opentelemetry/semantic-conventions": "^1.0.0"
+    "@opentelemetry/sdk-node": "^0.43.0",
+    "@opentelemetry/sdk-trace-base": "^1.0.1"
   },
   "repository": {
     "type": "git",

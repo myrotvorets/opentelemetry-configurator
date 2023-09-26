@@ -11,6 +11,9 @@ permissions:
 jobs:
   build:
     name: Build and test
+    permissions:
+      contents: read
+      packages: read
     runs-on: ubuntu-latest
     steps:
       - name: Build and test

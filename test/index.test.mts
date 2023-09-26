@@ -40,19 +40,19 @@ describe('OpenTelemetryConfigurator', function () {
 
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
-            detectors: [],
+            resourceDetectors: [],
             traceExporter: exporter,
         });
 
-        configurator.start();
-        const tracer = configurator.getTraceProvider();
-        expect(tracer).not.to.be.undefined;
+        const started = configurator.start();
+        expect(started).to.be.true;
 
-        await configurator.shutdown();
+        const finished = await configurator.shutdown();
+        expect(finished).to.be.true;
         expect(td.explain(shutdownSpy).callCount).to.equal(1);
     });
 
-    it('should not reinitialize tracer multiple times', function () {
+    it('should not reinitialize tracer multiple times', async function () {
         const detector = new MyDetector();
         const detectSpy = td.func();
         td.replace(detector, 'detect', detectSpy);
@@ -60,32 +60,38 @@ describe('OpenTelemetryConfigurator', function () {
         process.env = {};
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
-            detectors: [detector],
+            resourceDetectors: [detector],
         });
 
-        configurator.start();
-        configurator.start();
+        try {
+            let started: boolean;
+            started = configurator.start();
+            expect(started).to.be.true;
+            started = configurator.start();
+            expect(started).to.be.false;
 
-        expect(td.explain(detectSpy).callCount).to.equal(1);
+            expect(td.explain(detectSpy).callCount).to.equal(1);
+        } finally {
+            await configurator.shutdown();
+        }
     });
 
-    it('should shut down on a termination signal', function () {
+    it('should shut down on a termination signal', async function () {
         const exporter = new MySpanExporter();
 
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
-            detectors: [],
+            resourceDetectors: [],
             traceExporter: exporter,
         });
 
-        configurator.start();
-        let tracer = configurator.getTraceProvider();
-        expect(tracer).not.to.be.undefined;
+        const started = configurator.start();
+        expect(started).to.be.true;
 
         process.emit('SIGTERM', 'SIGTERM');
 
-        tracer = configurator.getTraceProvider();
-        expect(tracer).to.be.undefined;
+        const finished = await configurator.shutdown();
+        expect(finished).to.be.false;
     });
 
     it('should handle double shutdown', async function () {
@@ -95,13 +101,27 @@ describe('OpenTelemetryConfigurator', function () {
 
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
-            detectors: [],
+            resourceDetectors: [],
             traceExporter: exporter,
         });
 
-        configurator.start();
-        await configurator.shutdown();
-        await configurator.shutdown();
+        const started = configurator.start();
+        expect(started).to.be.true;
+
+        let finished: boolean;
+        finished = await configurator.shutdown();
+        expect(finished).to.be.true;
+        finished = await configurator.shutdown();
+        expect(finished).to.be.false;
         expect(td.explain(shutdownSpy).callCount).to.equal(1);
+    });
+
+    it('should add default detectors', function () {
+        const configurator = new OpenTelemetryConfigurator({
+            serviceName: 'test',
+            resourceDetectors: [],
+        });
+
+        expect(configurator.config.resourceDetectors?.length).to.be.greaterThan(0);
     });
 });
