@@ -1,5 +1,4 @@
 /* eslint-disable class-methods-use-this, @typescript-eslint/no-empty-function */
-import { afterEach, describe, it } from 'mocha';
 import { expect } from 'chai';
 import * as td from 'testdouble';
 import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
@@ -23,14 +22,18 @@ class MySpanExporter implements SpanExporter {
     }
 }
 
-describe('OpenTelemetryConfigurator', () => {
-    const env = { ...process.env } as const;
+describe('OpenTelemetryConfigurator', function () {
+    let env: typeof process.env;
 
-    afterEach(() => {
+    before(function () {
+        env = { ...process.env };
+    });
+
+    afterEach(function () {
         process.env = { ...env };
     });
 
-    it('should pass a basic test', async () => {
+    it('should pass a basic test', async function () {
         const exporter = new MySpanExporter();
         const shutdownSpy = td.func();
         td.replace(exporter, 'shutdown', shutdownSpy);
@@ -49,7 +52,7 @@ describe('OpenTelemetryConfigurator', () => {
         expect(td.explain(shutdownSpy).callCount).to.equal(1);
     });
 
-    it('should not reinitialize tracer multiple times', () => {
+    it('should not reinitialize tracer multiple times', function () {
         const detector = new MyDetector();
         const detectSpy = td.func();
         td.replace(detector, 'detect', detectSpy);
@@ -66,7 +69,7 @@ describe('OpenTelemetryConfigurator', () => {
         expect(td.explain(detectSpy).callCount).to.equal(1);
     });
 
-    it('should shut down on a termination signal', () => {
+    it('should shut down on a termination signal', function () {
         const exporter = new MySpanExporter();
 
         const configurator = new OpenTelemetryConfigurator({
@@ -85,7 +88,7 @@ describe('OpenTelemetryConfigurator', () => {
         expect(tracer).to.be.undefined;
     });
 
-    it('should handle double shutdown', async () => {
+    it('should handle double shutdown', async function () {
         const exporter = new MySpanExporter();
         const shutdownSpy = td.func();
         td.replace(exporter, 'shutdown', shutdownSpy);

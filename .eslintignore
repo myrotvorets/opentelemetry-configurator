@@ -1,3 +1,4 @@
-**/*.js
-**/*.d.ts
+**/*.cjs
+**/*.mjs
+**/*.d.mts
 node_modules/**

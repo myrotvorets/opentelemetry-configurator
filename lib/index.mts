@@ -12,14 +12,13 @@ import {
     processDetector,
 } from '@opentelemetry/resources';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
-import debug from 'debug';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { packageJsonDetector } from './detector/packagejsondetector.mjs';
-import { k8sDetector } from './detector/k8sdetector.mjs';
-import { dockerDetector } from './detector/dockerdetector.mjs';
-import { osDetector } from './detector/osdetector.mjs';
-
-const dbg = debug('otcfg');
+import {
+    dockerDetector,
+    k8sDetector,
+    osDetector,
+    packageJsonDetector,
+} from '@myrotvorets/opentelemetry-resource-detectors';
 
 export interface Config {
     serviceName: string;
@@ -97,8 +96,6 @@ export class OpenTelemetryConfigurator {
             propagator: this.propagator,
         });
 
-        dbg(this.tracerProvider.resource?.attributes);
-
         process.once('SIGINT', this.shutdownHandler);
         process.once('SIGTERM', this.shutdownHandler);
         process.once('SIGQUIT', this.shutdownHandler);
@@ -130,7 +127,6 @@ export class OpenTelemetryConfigurator {
     private detectResources(): void {
         if (this.resourceDetectionConfig.detectors?.length) {
             const resource = detectResourcesSync(this.resourceDetectionConfig);
-            dbg(resource);
             this.nodeTracerConfig.resource = (this.nodeTracerConfig.resource as Resource).merge(resource);
         }
 
