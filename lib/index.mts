@@ -1,6 +1,6 @@
 import { processDetectorSync } from '@opentelemetry/resources';
 import { NodeSDK, type NodeSDKConfiguration } from '@opentelemetry/sdk-node';
-import { BatchSpanProcessor, NoopSpanProcessor, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { BatchSpanProcessor, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import {
     dockerDetector,
@@ -28,8 +28,6 @@ export class OpenTelemetryConfigurator {
                         ? new BatchSpanProcessor(this._config.traceExporter)
                         : new SimpleSpanProcessor(this._config.traceExporter);
                 /* c8 disable end */
-            } else {
-                this._config.spanProcessor = new NoopSpanProcessor();
             }
         }
 
