@@ -14,9 +14,9 @@
     "prepack": "npm run build"
   },
   "files": [
-    "dist/lib/index.d.mts",
-    "dist/lib/index.mjs",
-    "dist/lib/index.mjs.map"
+    "dist/lib/*.d.mts",
+    "dist/lib/*.mjs",
+    "dist/lib/*.mjs.map"
   ],
   "typings": "dist/lib/index.d.mts",
   "keywords": [],
