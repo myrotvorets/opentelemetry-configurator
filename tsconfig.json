@@ -12,7 +12,8 @@
         "noUnusedParameters": false,
         "noFallthroughCasesInSwitch": true,
         "esModuleInterop": true,
-        "resolveJsonModule": false
+        "resolveJsonModule": false,
+        "skipLibCheck": true
     },
     "compileOnSave": true
 }
