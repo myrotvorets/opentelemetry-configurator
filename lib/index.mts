@@ -1,5 +1,5 @@
 import { type Meter, metrics } from '@opentelemetry/api';
-import { type Logger, logs } from '@opentelemetry/api-logs';
+import { logs } from '@opentelemetry/api-logs';
 import { processDetectorSync } from '@opentelemetry/resources';
 import { NodeSDK, type NodeSDKConfiguration } from '@opentelemetry/sdk-node';
 import {
@@ -9,7 +9,12 @@ import {
     packageJsonDetector,
 } from '@myrotvorets/opentelemetry-resource-detectors';
 import { MetricsConfigurator } from './metrics.mjs';
+import { Logger } from './logger.mjs';
 import { LogsConfigurator } from './logs.mjs';
+
+export * from './logger.mjs';
+export * from './logs.mjs';
+export * from './metrics.mjs';
 
 export type Config = { serviceName: string } & Omit<Partial<NodeSDKConfiguration>, 'serviceName'>;
 
@@ -17,6 +22,7 @@ export class OpenTelemetryConfigurator {
     private readonly _config: Config;
     private readonly _sdk: NodeSDK;
     private _started = false;
+    private _logger: Logger | undefined;
 
     public constructor(config: Config) {
         this._config = config;
@@ -80,6 +86,10 @@ export class OpenTelemetryConfigurator {
     }
 
     public logger(): Logger {
-        return logs.getLogger(this._config.serviceName);
+        if (!this._logger) {
+            this._logger = new Logger(logs.getLogger(this._config.serviceName));
+        }
+
+        return this._logger;
     }
 }

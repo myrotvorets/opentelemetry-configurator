@@ -6,7 +6,7 @@ import { type ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { type DetectorSync, type IResource, Resource, type ResourceDetectionConfig } from '@opentelemetry/resources';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
-import { OpenTelemetryConfigurator } from '../lib/index.mjs';
+import { Logger, OpenTelemetryConfigurator } from '../lib/index.mjs';
 
 class MyDetector implements DetectorSync {
     public detect(_config: ResourceDetectionConfig): IResource {
@@ -150,7 +150,7 @@ describe('OpenTelemetryConfigurator', function () {
 
         configurator.start();
         const logger = configurator.logger();
-        expect(logger).to.be.an('object').and.have.property('emit');
+        expect(logger).to.be.an('object').that.is.instanceOf(Logger);
     });
 
     it('should set a metrics exporter from environment', function () {
