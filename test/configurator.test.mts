@@ -133,6 +133,17 @@ describe('OpenTelemetryConfigurator', function () {
         expect(configurator.config.resourceDetectors?.length).to.be.greaterThan(0);
     });
 
+    it('should return a Tracer', function () {
+        const configurator = new OpenTelemetryConfigurator({
+            serviceName: 'test',
+        });
+
+        configurator.start();
+        const tracer = configurator.tracer();
+
+        expect(tracer).to.be.an('object').and.have.property('startActiveSpan').that.is.a('function');
+    });
+
     it('should return a Meter', function () {
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
@@ -140,7 +151,7 @@ describe('OpenTelemetryConfigurator', function () {
 
         configurator.start();
         const meter = configurator.meter();
-        expect(meter).to.be.an('object').and.have.property('createCounter');
+        expect(meter).to.be.an('object').and.have.property('createCounter').that.is.a('function');
     });
 
     it('should return a Logger', function () {
