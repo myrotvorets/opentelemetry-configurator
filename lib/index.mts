@@ -3,3 +3,4 @@ export * from './configurator.mjs';
 export * from './logger.mjs';
 export * from './logs.mjs';
 export * from './metrics.mjs';
+export { recordErrorToSpan } from './utils.mjs';
