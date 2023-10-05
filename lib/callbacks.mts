@@ -3,14 +3,12 @@ import type { HttpCustomAttributeFunction } from '@opentelemetry/instrumentation
 import type { EndHook } from '@opentelemetry/instrumentation-fs';
 
 export const http_applyCustomAttributesOnSpan: HttpCustomAttributeFunction = (span, request) => {
-    if (
-        'kind' in span &&
-        span.kind === SpanKind.SERVER &&
-        'url' in request &&
-        typeof request.url === 'string' &&
-        typeof request.method === 'string'
-    ) {
-        span.updateName(`${request.method} ${request.url}`);
+    if ('kind' in span && span.kind === SpanKind.SERVER && typeof request.method === 'string') {
+        if ('originalUrl' in request && typeof request.originalUrl === 'string') {
+            span.updateName(`${request.method} ${request.originalUrl}`);
+        } else if ('url' in request && typeof request.url === 'string') {
+            span.updateName(`${request.method} ${request.url}`);
+        }
     }
 };
 

@@ -78,5 +78,27 @@ describe('callbacks', function () {
 
             expect(span).to.have.property('name', expectedSpanName);
         });
+
+        it('should prefer originalUrl', function () {
+            const request = new IncomingMessage(new Socket());
+            const response = new ServerResponse(request);
+            const url = '/some/url';
+            const originalUrl = '/some/original/url';
+            request.url = url;
+            (request as IncomingMessage & Record<'originalUrl', string>).originalUrl = originalUrl;
+            request.method = 'GET';
+            const expectedSpanName = `${request.method} ${originalUrl}`;
+            const tracer = provider.getTracer('test');
+            const span = tracer.startActiveSpan('some span', { kind: SpanKind.SERVER }, (span) => {
+                try {
+                    http_applyCustomAttributesOnSpan(span, request, response);
+                    return span;
+                } finally {
+                    span.end();
+                }
+            });
+
+            expect(span).to.have.property('name', expectedSpanName);
+        });
     });
 });

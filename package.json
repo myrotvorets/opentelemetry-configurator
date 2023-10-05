@@ -67,6 +67,9 @@
     "@opentelemetry/sdk-node": "^0.43.0",
     "@opentelemetry/sdk-trace-base": "^1.0.1"
   },
+  "overrides": {
+    "ansi-color": "npm:@myrotvorets/ansi-color@^0.2.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/myrotvorets/opentelemetry-configurator.git"
