@@ -2,7 +2,7 @@ import { diag } from '@opentelemetry/api';
 import { getEnv, getEnvWithoutDefaults } from '@opentelemetry/core';
 import { OTLPLogExporter as OTLPGrpcLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { OTLPLogExporter as OTLPHttpLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import { OTLPLogsExporter as OTLPProtoLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
+import { OTLPLogExporter as OTLPProtoLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
 import { type LogRecordExporter, type LogRecordProcessor, SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { filterBlanksAndNulls } from './utils.mjs';
 
