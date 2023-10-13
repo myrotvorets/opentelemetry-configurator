@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { getEnv } from '@opentelemetry/core';
 import { OTLPLogExporter as OTLPGrpcLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { OTLPLogExporter as OTLPHttpLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import { OTLPLogsExporter as OTLPProtoLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
+import { OTLPLogExporter as OTLPProtoLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
 import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { LogsConfigurator } from '../lib/logs.mjs';
 
