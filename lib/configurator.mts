@@ -14,13 +14,20 @@ import { LogsConfigurator } from './logs.mjs';
 
 export type Config = { serviceName: string } & Omit<Partial<NodeSDKConfiguration>, 'serviceName'>;
 
+let serviceName = 'service';
+let loggerInstance: Logger | undefined = undefined;
+
+export const tracer = (): Tracer => trace.getTracer(serviceName);
+export const meter = (): Meter => metrics.getMeter(serviceName);
+export const logger = (): Logger => (loggerInstance ??= new Logger(logs.getLogger(serviceName)));
+
 export class OpenTelemetryConfigurator {
     private readonly _config: Config;
     private readonly _sdk: NodeSDK;
     private _started = false;
-    private _logger: Logger | undefined;
 
     public constructor(config: Config) {
+        serviceName = config.serviceName;
         this._config = config;
 
         if (!this._config.resourceDetectors?.length && false !== this._config.autoDetectResources) {
@@ -77,19 +84,24 @@ export class OpenTelemetryConfigurator {
         return this._config;
     }
 
-    public tracer(): Tracer {
-        return trace.getTracer(this._config.serviceName);
+    /**
+     * @deprecated Use `tracer()` instead.
+     */
+    public tracer(): Tracer /* eslint-disable-line class-methods-use-this */ {
+        return tracer();
     }
 
-    public meter(): Meter {
-        return metrics.getMeter(this._config.serviceName);
+    /**
+     * @deprecated Use `meter()` instead.
+     */
+    public meter(): Meter /* eslint-disable-line class-methods-use-this */ {
+        return meter();
     }
 
-    public logger(): Logger {
-        if (!this._logger) {
-            this._logger = new Logger(logs.getLogger(this._config.serviceName));
-        }
-
-        return this._logger;
+    /**
+     * @deprecated Use `logger()` instead.
+     */
+    public logger(): Logger /* eslint-disable-line class-methods-use-this */ {
+        return logger();
     }
 }
