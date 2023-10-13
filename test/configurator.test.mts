@@ -6,7 +6,7 @@ import { type ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { type DetectorSync, type IResource, Resource, type ResourceDetectionConfig } from '@opentelemetry/resources';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
-import { Logger, OpenTelemetryConfigurator } from '../lib/index.mjs';
+import { OpenTelemetryConfigurator } from '../lib/index.mjs';
 
 class MyDetector implements DetectorSync {
     public detect(_config: ResourceDetectionConfig): IResource {
@@ -131,37 +131,6 @@ describe('OpenTelemetryConfigurator', function () {
         });
 
         expect(configurator.config.resourceDetectors?.length).to.be.greaterThan(0);
-    });
-
-    it('should return a Tracer', function () {
-        const configurator = new OpenTelemetryConfigurator({
-            serviceName: 'test',
-        });
-
-        configurator.start();
-        const tracer = configurator.tracer();
-
-        expect(tracer).to.be.an('object').and.have.property('startActiveSpan').that.is.a('function');
-    });
-
-    it('should return a Meter', function () {
-        const configurator = new OpenTelemetryConfigurator({
-            serviceName: 'test',
-        });
-
-        configurator.start();
-        const meter = configurator.meter();
-        expect(meter).to.be.an('object').and.have.property('createCounter').that.is.a('function');
-    });
-
-    it('should return a Logger', function () {
-        const configurator = new OpenTelemetryConfigurator({
-            serviceName: 'test',
-        });
-
-        configurator.start();
-        const logger = configurator.logger();
-        expect(logger).to.be.an('object').that.is.instanceOf(Logger);
     });
 
     it('should set a metrics exporter from environment', function () {

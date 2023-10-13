@@ -1,5 +1,3 @@
-import { type Meter, type Tracer, metrics, trace } from '@opentelemetry/api';
-import { logs } from '@opentelemetry/api-logs';
 import { processDetectorSync } from '@opentelemetry/resources';
 import { NodeSDK, type NodeSDKConfiguration } from '@opentelemetry/sdk-node';
 import {
@@ -9,17 +7,9 @@ import {
     packageJsonDetector,
 } from '@myrotvorets/opentelemetry-resource-detectors';
 import { MetricsConfigurator } from './metrics.mjs';
-import { Logger } from './logger.mjs';
 import { LogsConfigurator } from './logs.mjs';
 
 export type Config = { serviceName: string } & Omit<Partial<NodeSDKConfiguration>, 'serviceName'>;
-
-let serviceName = 'service';
-let loggerInstance: Logger | undefined = undefined;
-
-export const tracer = (): Tracer => trace.getTracer(serviceName);
-export const meter = (): Meter => metrics.getMeter(serviceName);
-export const logger = (): Logger => (loggerInstance ??= new Logger(logs.getLogger(serviceName)));
 
 export class OpenTelemetryConfigurator {
     private readonly _config: Config;
@@ -27,7 +17,6 @@ export class OpenTelemetryConfigurator {
     private _started = false;
 
     public constructor(config: Config) {
-        serviceName = config.serviceName;
         this._config = config;
 
         if (!this._config.resourceDetectors?.length && false !== this._config.autoDetectResources) {
@@ -82,26 +71,5 @@ export class OpenTelemetryConfigurator {
 
     public get config(): Readonly<Config> {
         return this._config;
-    }
-
-    /**
-     * @deprecated Use `tracer()` instead.
-     */
-    public tracer(): Tracer /* eslint-disable-line class-methods-use-this */ {
-        return tracer();
-    }
-
-    /**
-     * @deprecated Use `meter()` instead.
-     */
-    public meter(): Meter /* eslint-disable-line class-methods-use-this */ {
-        return meter();
-    }
-
-    /**
-     * @deprecated Use `logger()` instead.
-     */
-    public logger(): Logger /* eslint-disable-line class-methods-use-this */ {
-        return logger();
     }
 }
