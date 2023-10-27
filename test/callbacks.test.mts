@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse } from 'node:http';
+import { ClientRequest, IncomingMessage, ServerResponse } from 'node:http';
 import { Socket } from 'node:net';
 import { expect } from 'chai';
 import { BasicTracerProvider } from '@opentelemetry/sdk-trace-base';
@@ -60,7 +60,7 @@ describe('callbacks', function () {
     });
 
     describe('http_applyCustomAttributesOnSpan', function () {
-        it('should work', function () {
+        it('should work for server', function () {
             const request = new IncomingMessage(new Socket());
             const response = new ServerResponse(request);
             request.url = '/some/url';
@@ -90,6 +90,28 @@ describe('callbacks', function () {
             const expectedSpanName = `${request.method} ${originalUrl}`;
             const tracer = provider.getTracer('test');
             const span = tracer.startActiveSpan('some span', { kind: SpanKind.SERVER }, (span) => {
+                try {
+                    http_applyCustomAttributesOnSpan(span, request, response);
+                    return span;
+                } finally {
+                    span.end();
+                }
+            });
+
+            expect(span).to.have.property('name', expectedSpanName);
+        });
+
+        it('should work for client', function () {
+            const url = new URL('http://example.com:81/?a=b');
+            const request = new ClientRequest(url);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            request.once('error', () => {});
+            request.destroy();
+            const response = new IncomingMessage(new Socket());
+
+            const expectedSpanName = `${request.method} ${url.pathname}${url.search}`;
+            const tracer = provider.getTracer('test');
+            const span = tracer.startActiveSpan('some span', { kind: SpanKind.CLIENT }, (span) => {
                 try {
                     http_applyCustomAttributesOnSpan(span, request, response);
                     return span;

@@ -1,13 +1,20 @@
+import type { ClientRequest, IncomingMessage } from 'node:http';
 import { SpanKind } from '@opentelemetry/api';
 import type { HttpCustomAttributeFunction } from '@opentelemetry/instrumentation-http';
 import type { EndHook } from '@opentelemetry/instrumentation-fs';
 
 export const http_applyCustomAttributesOnSpan: HttpCustomAttributeFunction = (span, request) => {
-    if ('kind' in span && span.kind === SpanKind.SERVER && typeof request.method === 'string') {
-        if ('originalUrl' in request && typeof request.originalUrl === 'string') {
-            span.updateName(`${request.method} ${request.originalUrl}`);
-        } else if ('url' in request && typeof request.url === 'string') {
-            span.updateName(`${request.method} ${request.url}`);
+    if ('kind' in span && typeof request.method === 'string') {
+        if (span.kind === SpanKind.SERVER) {
+            const req = request as IncomingMessage;
+            if ('originalUrl' in req && typeof req.originalUrl === 'string') {
+                span.updateName(`${req.method} ${req.originalUrl}`);
+            } else {
+                span.updateName(`${req.method} ${req.url}`);
+            }
+        } else if (span.kind === SpanKind.CLIENT) {
+            const req = request as ClientRequest;
+            span.updateName(`${req.method} ${req.path}`);
         }
     }
 };
