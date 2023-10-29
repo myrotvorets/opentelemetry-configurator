@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this, @typescript-eslint/no-empty-function */
+import { mock } from 'node:test';
 import { expect } from 'chai';
-import { explain, func, replace } from 'testdouble';
 import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
 import { type ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { type DetectorSync, type IResource, Resource, type ResourceDetectionConfig } from '@opentelemetry/resources';
@@ -8,9 +8,12 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OpenTelemetryConfigurator } from '../lib/index.mjs';
 
+const detectSpy = mock.fn<DetectorSync['detect']>(() => Resource.empty());
+const shutdownSpy = mock.fn<SpanExporter['shutdown']>(() => Promise.resolve());
+
 class MyDetector implements DetectorSync {
-    public detect(_config: ResourceDetectionConfig): IResource {
-        return Resource.empty();
+    public detect(config: ResourceDetectionConfig): IResource {
+        return detectSpy(config);
     }
 }
 
@@ -20,7 +23,7 @@ class MySpanExporter implements SpanExporter {
     }
 
     public shutdown(): Promise<void> {
-        return Promise.resolve();
+        return shutdownSpy();
     }
 }
 
@@ -35,16 +38,18 @@ describe('OpenTelemetryConfigurator', function () {
         env = {
             NODE_ENV: 'test',
         };
+
+        detectSpy.mock.resetCalls();
+        shutdownSpy.mock.resetCalls();
     });
 
     afterEach(function () {
         process.env = { ...env };
+        mock.reset();
     });
 
     it('should pass a basic test', async function () {
         const exporter = new MySpanExporter();
-        const shutdownSpy = func();
-        replace(exporter, 'shutdown', shutdownSpy);
 
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
@@ -57,13 +62,11 @@ describe('OpenTelemetryConfigurator', function () {
 
         const finished = await configurator.shutdown();
         expect(finished).to.be.true;
-        expect(explain(shutdownSpy).callCount).to.equal(1);
+        expect(shutdownSpy.mock.callCount()).to.equal(1);
     });
 
     it('should not reinitialize tracer multiple times', async function () {
         const detector = new MyDetector();
-        const detectSpy = func();
-        replace(detector, 'detect', detectSpy);
 
         process.env = {};
         const configurator = new OpenTelemetryConfigurator({
@@ -78,7 +81,7 @@ describe('OpenTelemetryConfigurator', function () {
             started = configurator.start();
             expect(started).to.be.false;
 
-            expect(explain(detectSpy).callCount).to.equal(1);
+            expect(detectSpy.mock.callCount()).to.equal(1);
         } finally {
             await configurator.shutdown();
         }
@@ -104,8 +107,6 @@ describe('OpenTelemetryConfigurator', function () {
 
     it('should handle double shutdown', async function () {
         const exporter = new MySpanExporter();
-        const shutdownSpy = func();
-        replace(exporter, 'shutdown', shutdownSpy);
 
         const configurator = new OpenTelemetryConfigurator({
             serviceName: 'test',
@@ -121,7 +122,7 @@ describe('OpenTelemetryConfigurator', function () {
         expect(finished).to.be.true;
         finished = await configurator.shutdown();
         expect(finished).to.be.false;
-        expect(explain(shutdownSpy).callCount).to.equal(1);
+        expect(shutdownSpy.mock.callCount()).to.equal(1);
     });
 
     it('should add default detectors', function () {
