@@ -71,10 +71,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/myrotvorets/opentelemetry-configurator.git"
+    "url": "https://github.com/myrotvorets/opentelemetry-configurator.git"
   },
   "bugs": {
     "url": "https://github.com/myrotvorets/opentelemetry-configurator/issues"
   },
-  "homepage": "https://github.com/myrotvorets/opentelemetry-configurator#readme"
+  "homepage": "https://github.com/myrotvorets/opentelemetry-configurator#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }
