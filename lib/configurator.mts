@@ -66,7 +66,7 @@ export class OpenTelemetryConfigurator {
     }
 
     private readonly shutdownHandler = (): void => {
-        this.shutdown().catch((e) => console.error(e));
+        this.shutdown().catch((e: unknown) => console.error(e));
     };
 
     public get config(): Readonly<Config> {
