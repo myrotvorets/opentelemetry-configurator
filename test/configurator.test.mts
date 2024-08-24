@@ -1,4 +1,4 @@
-/* eslint-disable class-methods-use-this, @typescript-eslint/no-empty-function */
+/* eslint-disable class-methods-use-this, @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-expressions */
 import { mock } from 'node:test';
 import { expect } from 'chai';
 import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
