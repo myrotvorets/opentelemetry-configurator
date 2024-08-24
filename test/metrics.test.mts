@@ -1,4 +1,4 @@
-/* eslint-disable mocha/no-setup-in-describe */
+/* eslint-disable mocha/no-setup-in-describe, @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai';
 import { getEnv } from '@opentelemetry/core';
 import { OTLPMetricExporter as OTLPGrpcMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
