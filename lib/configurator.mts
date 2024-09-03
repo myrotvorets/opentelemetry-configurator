@@ -9,7 +9,10 @@ import {
 import { MetricsConfigurator } from './metrics.mjs';
 import { LogsConfigurator } from './logs.mjs';
 
-export type Config = { serviceName: string } & Omit<Partial<NodeSDKConfiguration>, 'serviceName'>;
+export type Config = { serviceName: string } & Omit<
+    Partial<NodeSDKConfiguration>,
+    'serviceName' | 'logRecordProcessor'
+>;
 
 export class OpenTelemetryConfigurator {
     private readonly _config: Config;
@@ -33,8 +36,8 @@ export class OpenTelemetryConfigurator {
             this._config.metricReader = new MetricsConfigurator().reader;
         }
 
-        if (!this._config.logRecordProcessor) {
-            this._config.logRecordProcessor = new LogsConfigurator().processor;
+        if (!this._config.logRecordProcessors?.length) {
+            this._config.logRecordProcessors = [new LogsConfigurator().processor].filter((x) => x !== undefined);
         }
 
         this._sdk = new NodeSDK(this._config);

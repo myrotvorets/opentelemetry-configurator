@@ -153,6 +153,9 @@ describe('OpenTelemetryConfigurator', function () {
             serviceName: 'test',
         });
 
-        expect(configurator.config.logRecordProcessor).to.be.an('object').that.is.instanceOf(SimpleLogRecordProcessor);
+        expect(configurator.config.logRecordProcessors).to.be.an('array').that.has.lengthOf(1);
+        expect(configurator.config.logRecordProcessors![0])
+            .to.be.an('object')
+            .that.is.instanceOf(SimpleLogRecordProcessor);
     });
 });
