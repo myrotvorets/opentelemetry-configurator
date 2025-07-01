@@ -1,4 +1,6 @@
-import { processDetectorSync } from '@opentelemetry/resources';
+import { processDetector } from '@opentelemetry/resources';
+import { context, diag, metrics, propagation, trace } from '@opentelemetry/api';
+import { logs } from '@opentelemetry/api-logs';
 import { NodeSDK, type NodeSDKConfiguration } from '@opentelemetry/sdk-node';
 import {
     dockerDetector,
@@ -6,13 +8,8 @@ import {
     osDetector,
     packageJsonDetector,
 } from '@myrotvorets/opentelemetry-resource-detectors';
-import { MetricsConfigurator } from './metrics.mjs';
-import { LogsConfigurator } from './logs.mjs';
 
-export type Config = { serviceName: string } & Omit<
-    Partial<NodeSDKConfiguration>,
-    'serviceName' | 'logRecordProcessor'
->;
+export type Config = { serviceName: string } & Omit<Partial<NodeSDKConfiguration>, 'serviceName'>;
 
 export class OpenTelemetryConfigurator {
     private readonly _config: Config;
@@ -28,16 +25,8 @@ export class OpenTelemetryConfigurator {
                 dockerDetector,
                 k8sDetector,
                 packageJsonDetector,
-                processDetectorSync,
+                processDetector,
             ];
-        }
-
-        if (!this._config.metricReader) {
-            this._config.metricReader = new MetricsConfigurator().reader;
-        }
-
-        if (!this._config.logRecordProcessors?.length) {
-            this._config.logRecordProcessors = [new LogsConfigurator().processor].filter((x) => x !== undefined);
         }
 
         this._sdk = new NodeSDK(this._config);
@@ -62,6 +51,12 @@ export class OpenTelemetryConfigurator {
         if (this._started) {
             this._started = false;
             await this._sdk.shutdown();
+            context.disable();
+            diag.disable();
+            metrics.disable();
+            propagation.disable();
+            trace.disable();
+            logs.disable();
             return true;
         }
 
