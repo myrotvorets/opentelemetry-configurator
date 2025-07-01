@@ -7,9 +7,6 @@ on:
   pull_request:
     branches:
       - master
-    paths:
-      - "lib/**.ts"
-      - ".github/workflows/codeql-analysis.yml"
   schedule:
     - cron: '4 3 * * 1'
 
@@ -25,6 +22,7 @@ jobs:
       matrix:
         language:
           - javascript
+          - actions
     permissions:
       actions: read
       contents: read
@@ -41,3 +39,5 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@181d5eefc20863364f96762470ba6f862bdef56b # v3.29.2
+        with:
+          category: "/language:${{ matrix.language }}"
