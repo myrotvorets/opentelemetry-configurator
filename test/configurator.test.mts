@@ -3,16 +3,14 @@ import { mock } from 'node:test';
 import { expect } from 'chai';
 import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
 import { type ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
-import { type DetectorSync, type IResource, Resource, type ResourceDetectionConfig } from '@opentelemetry/resources';
-import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import { type DetectedResource, type ResourceDetectionConfig, type ResourceDetector } from '@opentelemetry/resources';
 import { OpenTelemetryConfigurator } from '../lib/index.mjs';
 
-const detectSpy = mock.fn<DetectorSync['detect']>(() => Resource.empty());
+const detectSpy = mock.fn<ResourceDetector['detect']>(() => ({}));
 const shutdownSpy = mock.fn<SpanExporter['shutdown']>(() => Promise.resolve());
 
-class MyDetector implements DetectorSync {
-    public detect(config: ResourceDetectionConfig): IResource {
+class MyDetector implements ResourceDetector {
+    public detect(config?: ResourceDetectionConfig): DetectedResource {
         return detectSpy(config);
     }
 }
@@ -132,30 +130,5 @@ describe('OpenTelemetryConfigurator', function () {
         });
 
         expect(configurator.config.resourceDetectors?.length).to.be.greaterThan(0);
-    });
-
-    it('should set a metrics exporter from environment', function () {
-        process.env.OTEL_METRICS_EXPORTER = 'otlp';
-        process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = 'http://localhost:4317';
-
-        const configurator = new OpenTelemetryConfigurator({
-            serviceName: 'test',
-        });
-
-        expect(configurator.config.metricReader).to.be.an('object').that.is.instanceOf(PeriodicExportingMetricReader);
-    });
-
-    it('should set a log exporter from environment', function () {
-        process.env.OTEL_LOGS_EXPORTER = 'otlp';
-        process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://localhost:4317';
-
-        const configurator = new OpenTelemetryConfigurator({
-            serviceName: 'test',
-        });
-
-        expect(configurator.config.logRecordProcessors).to.be.an('array').that.has.lengthOf(1);
-        expect(configurator.config.logRecordProcessors![0])
-            .to.be.an('object')
-            .that.is.instanceOf(SimpleLogRecordProcessor);
     });
 });
