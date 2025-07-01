@@ -1,3 +1,4 @@
+import { before, describe, it } from 'node:test';
 import { ClientRequest, IncomingMessage, ServerResponse } from 'node:http';
 import { Socket } from 'node:net';
 import { expect } from 'chai';
@@ -5,15 +6,17 @@ import { BasicTracerProvider } from '@opentelemetry/sdk-trace-base';
 import { SpanKind } from '@opentelemetry/api';
 import { fs_endHook, fs_endHook_updateName, http_applyCustomAttributesOnSpan } from '../lib/index.mjs';
 
-describe('callbacks', function () {
+import './setup.mjs';
+
+await describe('callbacks', async function () {
     let provider: BasicTracerProvider;
 
     before(function () {
         provider = new BasicTracerProvider();
     });
 
-    describe('fs_endHook', function () {
-        it('should work', function () {
+    await describe('fs_endHook', async function () {
+        await it('should work', function () {
             const expectedSpanName = 'span';
             const expectedFile = '/some/file';
             const tracer = provider.getTracer('test');
@@ -35,8 +38,8 @@ describe('callbacks', function () {
         });
     });
 
-    describe('fs_endHook_updateName', function () {
-        it('should work', function () {
+    await describe('fs_endHook_updateName', async function () {
+        await it('should work', function () {
             const spanName = 'span';
             const expectedFile = '/some/file';
             const expectedSpanName = `${spanName} - ${expectedFile}`;
@@ -59,8 +62,8 @@ describe('callbacks', function () {
         });
     });
 
-    describe('http_applyCustomAttributesOnSpan', function () {
-        it('should work for server', function () {
+    await describe('http_applyCustomAttributesOnSpan', async function () {
+        await it('should work for server', function () {
             const request = new IncomingMessage(new Socket());
             const response = new ServerResponse(request);
             request.url = '/some/url';
@@ -79,7 +82,7 @@ describe('callbacks', function () {
             expect(span).to.have.property('name', expectedSpanName);
         });
 
-        it('should prefer originalUrl', function () {
+        await it('should prefer originalUrl', function () {
             const request = new IncomingMessage(new Socket());
             const response = new ServerResponse(request);
             const url = '/some/url';
@@ -101,7 +104,7 @@ describe('callbacks', function () {
             expect(span).to.have.property('name', expectedSpanName);
         });
 
-        it('should work for client', function () {
+        await it('should work for client', function () {
             const url = new URL('http://example.com:81/?a=b');
             const request = new ClientRequest(url);
             // eslint-disable-next-line @typescript-eslint/no-empty-function
