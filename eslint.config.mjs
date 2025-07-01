@@ -8,12 +8,15 @@ export default [
         ignores: ['dist/**'],
     },
     ...MyrotvoretsConfig,
-    MochaPlugin.configs.flat.recommended,
+    MochaPlugin.configs.recommended,
     {
         languageOptions: {
             globals: {
                 ...globals.node,
             },
+        },
+        rules: {
+            'mocha/consistent-spacing-between-blocks': 'off',
         },
     },
 ];
