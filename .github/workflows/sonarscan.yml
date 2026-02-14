@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
+      security-events: write
       packages: read
     if: |
       github.event_name == 'workflow_dispatch' ||
