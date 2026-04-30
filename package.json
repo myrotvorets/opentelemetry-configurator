@@ -36,7 +36,7 @@
     "node-reporter-gha": "^2.0.8",
     "node-reporter-sonarqube": "^1.0.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.0"
   },
   "dependencies": {
     "@myrotvorets/opentelemetry-resource-detectors": "^2.0.1",
