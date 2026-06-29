@@ -47,7 +47,7 @@
     "@opentelemetry/instrumentation-fs": "^0.32.0",
     "@opentelemetry/instrumentation-http": "^0.213.0",
     "@opentelemetry/resources": "^2.6.0",
-    "@opentelemetry/sdk-node": "^0.213.0"
+    "@opentelemetry/sdk-node": "^0.217.0"
   },
   "overrides": {
     "ansi-color": "npm:@myrotvorets/ansi-color@^0.2.2"
