@@ -27,7 +27,7 @@ jobs:
       github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci skip]')
     steps:
       - name: Run SonarCloud analysis
-        uses: myrotvorets/composite-actions/node-sonarscan@0b8b877ead5e4e6718786803b91d295017964111 # master
+        uses: myrotvorets/composite-actions/node-sonarscan@c4c07ee643990a78097e4d7b1a1fe481b0f2c3f9 # master
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           test-script: 'test:sonarqube'
