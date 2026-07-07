@@ -8,9 +8,9 @@
     "build": "tsc",
     "lint": "eslint -f gha .",
     "lint:fix": "eslint --fix .",
-    "test": "node --import=./loader.mjs --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=node-reporter-gha --test-reporter-destination=stdout test/*.test.mts",
-    "test:coverage": "node --import=./loader.mjs --test --experimental-test-coverage --test-coverage-include=\"lib/**\" --test-reporter=spec --test-reporter-destination=stdout test/*.test.mts",
-    "test:sonarqube": "node --import=./loader.mjs --test --experimental-test-coverage --test-coverage-include=\"lib/**\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=node-reporter-sonarqube --test-reporter-destination=test-report.xml --test-reporter=lcov --test-reporter-destination=lcov.info --test test/*.test.mts",
+    "test": "node --import=tsx --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=node-reporter-gha --test-reporter-destination=stdout test/*.test.mts",
+    "test:coverage": "node --import=tsx --test --experimental-test-coverage --test-coverage-include=\"lib/**\" --test-reporter=spec --test-reporter-destination=stdout test/*.test.mts",
+    "test:sonarqube": "node --import=tsx --test --experimental-test-coverage --test-coverage-include=\"lib/**\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=node-reporter-sonarqube --test-reporter-destination=test-report.xml --test-reporter=lcov --test-reporter-destination=lcov.info --test test/*.test.mts",
     "typecheck": "tsc --noEmit",
     "prepack": "npm run build"
   },
@@ -35,8 +35,8 @@
     "eslint-formatter-gha": "^2.0.1",
     "node-reporter-gha": "^2.0.8",
     "node-reporter-sonarqube": "^1.0.3",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.0"
   },
   "dependencies": {
     "@myrotvorets/opentelemetry-resource-detectors": "^2.0.1",
